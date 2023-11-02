@@ -234,26 +234,39 @@ app.post('/add-to-cart', (req, res) => {
   const { clienteId, produtoId, qtd } = req.body; // Assuming data is sent via POST request
 
   // Check if the product exists in the cart
-  const selectQuery = `SELECT * FROM carrinho WHERE cliente_id = ${clienteId} AND produto_id = ${produtoId}`;
+  const selectQuery = `SELECT carrinho.*, produtos.qtd as produto_qtd, titulo FROM carrinho JOIN produtos ON carrinho.produto_id = produtos.id WHERE cliente_id = ${clienteId} AND produto_id = ${produtoId}`;
 
   connection.query(selectQuery, (selectErr, selectResult) => {
     if (selectErr) {
       res.status(500).send('Error checking product in the cart');
     } else {
       if (selectResult.length > 0) {
-        // If the product exists, update the quantity
         const cartQuantity = parseInt(selectResult[0].qtd);
-        const updatedQuantity = cartQuantity + parseInt(qtd);
+        console.log('cartQuantity: ', cartQuantity);
 
-        // Start a transaction
+        const prodQuantity = parseInt(selectResult[0].produto_qtd);
+        console.log('prodQuantity: ', prodQuantity);
+
+        const updatedQuantity = parseInt(qtd);
+        console.log('updatedQuantity: ', updatedQuantity);
+
+        if (updatedQuantity <= 0) {
+          res.status(400).send('Invalid quantity');
+          return;
+        }
+
+        const diff = cartQuantity - updatedQuantity;
+        console.log('diff: ', diff);
+
+        let finalDiff = prodQuantity + diff;
+        console.log('finaldiff: ', finalDiff);
         connection.beginTransaction((beginTransactionErr) => {
           if (beginTransactionErr) {
             res.status(500).send('Error starting transaction');
             return;
           }
 
-          // Update the produtos table
-          const updateProdutosQuery = `UPDATE produtos SET qtd = qtd - ${qtd} WHERE id = ${produtoId}`;
+          const updateProdutosQuery = `UPDATE produtos SET qtd = ${finalDiff} WHERE id = ${produtoId}`;
           connection.query(
             updateProdutosQuery,
             (updateProdErr, updateProdResult) => {
@@ -266,7 +279,6 @@ app.post('/add-to-cart', (req, res) => {
                 return;
               }
 
-              // Update the carrinho table
               const updateCarrinhoQuery = `UPDATE carrinho SET qtd = ${updatedQuantity} WHERE cliente_id = ${clienteId} AND produto_id = ${produtoId}`;
               connection.query(
                 updateCarrinhoQuery,
@@ -282,7 +294,6 @@ app.post('/add-to-cart', (req, res) => {
                     return;
                   }
 
-                  // If both updates are successful, commit the transaction
                   connection.commit((commitErr) => {
                     if (commitErr) {
                       connection.rollback(() => {
@@ -300,32 +311,28 @@ app.post('/add-to-cart', (req, res) => {
           );
         });
       } else {
-        // Update the produtos table
         const updateProdutosQuery = `UPDATE produtos SET qtd = qtd - ${qtd} WHERE id = ${produtoId}`;
         connection.query(
           updateProdutosQuery,
           (updateProdErr, updateProdResult) => {
             if (updateProdErr) {
-              connection.rollback(() => {
-                res
-                  .status(500)
-                  .send('Error updating product quantity in produtos table');
-              });
+              res
+                .status(500)
+                .send('Error updating product quantity in produtos table');
               return;
             }
+
+            const insertQuery = `INSERT INTO carrinho (cliente_id, produto_id, qtd) VALUES (${clienteId}, ${produtoId}, ${qtd})`;
+
+            connection.query(insertQuery, (insertErr, insertResult) => {
+              if (insertErr) {
+                res.status(500).send('Error adding product to the cart');
+              } else {
+                res.status(200).send('Product added to the cart successfully');
+              }
+            });
           }
         );
-
-        // If the product doesn't exist, insert a new record
-        const insertQuery = `INSERT INTO carrinho (cliente_id, produto_id, qtd) VALUES (${clienteId}, ${produtoId}, ${qtd})`;
-
-        connection.query(insertQuery, (insertErr, insertResult) => {
-          if (insertErr) {
-            res.status(500).send('Error adding product to the cart');
-          } else {
-            res.status(200).send('Product added to the cart successfully');
-          }
-        });
       }
     }
   });
@@ -430,6 +437,51 @@ app.post('/removeAllFromCarrinho', (req, res) => {
 //finalizar a compra
 app.post('/comprar', (req, res) => {
   console.log(req.body);
+});
+
+//rotas de enderecos
+// Rota para listar endereços por cliente
+app.get('/getEnderecos/:id', (req, res) => {
+  const idCliente = req.params.id;
+  const query = 'SELECT * FROM enderecos WHERE idCliente = ?';
+
+  connection.query(query, idCliente, (error, results, fields) => {
+    if (error) {
+      res.status(500).send('Erro ao buscar endereços por cliente.');
+      throw error;
+    }
+    res.json(results); // Retorna os resultados em formato JSON
+  });
+});
+
+// Rota para cadastrar um novo endereço para um cliente específico
+app.post('/addEndereco/:id', (req, res) => {
+  const idCliente = req.params.idCliente;
+  const { cep, endereco, numero, complemento, bairro, cidade, estado } =
+    req.body;
+
+  const INSERT_ADDRESS_QUERY =
+    'INSERT INTO enderecos (cep, endereco, numero, complemento, bairro, cidade, estado, idCliente) VALUES (?, ?, ?, ?, ?, ?, ?, ?)';
+  const values = [
+    cep,
+    endereco,
+    numero,
+    complemento,
+    bairro,
+    cidade,
+    estado,
+    idCliente,
+  ];
+
+  connection.query(INSERT_ADDRESS_QUERY, values, (error, results, fields) => {
+    if (error) {
+      res.status(500).send('Erro ao cadastrar novo endereço para o cliente.');
+      throw error;
+    }
+    res
+      .status(201)
+      .send('Novo endereço cadastrado para o cliente com sucesso!');
+  });
 });
 
 app.post('/teste', (req, res) => {

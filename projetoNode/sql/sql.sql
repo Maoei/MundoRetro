@@ -91,3 +91,15 @@ VALUES
 (4, 'Jogo de Panelas', 'Conjunto de panelas antiaderentes', '2024-01-20', 'Casa', 79.99),
 (11, 'Escova Elétrica', 'Escova de dentes elétrica', '2024-02-25', 'Saúde', 24.99),
 (6, 'Teclado Mecânico', 'Teclado para jogos mecânico com LED', '2024-03-30', 'Tecnologia', 69.99);
+
+INSERT INTO enderecos (cep, endereco, numero, complemento, bairro, cidade, estado, idCliente) VALUES
+('12345-678', 'Rua Exemplo 1', 10, 'APTO 101', 'Centro', 'Cidade A', 'UF', 1),
+('54321-876', 'Rua Teste 2', 20, NULL, 'Bairro Teste', 'Cidade B', 'UF', 2),
+('11111-222', 'Rua dos Testes', 30, 'Casa 2', 'Centro', 'Cidade A', 'UF', 3),
+('44444-555', 'Avenida Principal', 40, 'Sala 3', 'Bairro Legal', 'Cidade C', 'UF', 4),
+('77777-888', 'Praça da Amizade', 50, NULL, 'Bairro Feliz', 'Cidade D', 'UF', 5),
+('99999-000', 'Rua Nova', 60, 'Loja 5', 'Bairro Novo', 'Cidade E', 'UF', 1),
+('22222-333', 'Avenida Central', 70, NULL, 'Bairro Central', 'Cidade A', 'UF', 2),
+('66666-777', 'Travessa da Paz', 80, 'Casa 8', 'Bairro Tranquilo', 'Cidade B', 'UF', 3),
+('88888-999', 'Rua da Colina', 90, NULL, 'Bairro Alto', 'Cidade C', 'UF', 4),
+('33333-444', 'Alameda das Flores', 100, 'Apartamento 10', 'Bairro das Flores', 'Cidade D', 'UF', 5);

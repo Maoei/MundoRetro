@@ -38,6 +38,18 @@ const router = createRouter({
       component: () => import('../views/ProdutoDetalheView.vue'),
       props: true,
     },
+    {
+      path: '/enderecos',
+      name: 'enderecos',
+      component: () => import('../views/EnderecosView.vue'),
+      props: true,
+    },
+    {
+      path: '/enderecos/cadastro',
+      name: 'enderecosCadastro',
+      component: () => import('../views/EnderecosCadastroView.vue'),
+      props: true,
+    },
   ],
 });
 

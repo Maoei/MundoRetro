@@ -50,6 +50,33 @@ async function deleteUmCarrinho(id) {
       console.error('Erro ao enviar dados:', error);
     });
 }
+
+async function updateCarrinho(id, qtd) {
+  console.log(id, qtd);
+}
+
+async function addCarrinho(id, qtd) {
+  carrinhoData.data.produtoId = id;
+  carrinhoData.data.clienteId = localStorage.id;
+  carrinhoData.data.qtd = qtd;
+
+  console.log(carrinhoData.data);
+  fetch('http://localhost:3001/add-to-cart/', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(carrinhoData.data),
+  })
+    .then((response) => response)
+    .then((data) => {
+      console.log('Resposta do backend:', data);
+      getCarrinho();
+    })
+    .catch((error) => {
+      console.error('Erro ao enviar dados:', error);
+    });
+}
 </script>
 
 <template v-if="exibir">
@@ -59,11 +86,12 @@ async function deleteUmCarrinho(id) {
       <ul>
         <li v-for="produto in carrinhoData.produtos" :key="produto.id">
           <h2>{{ produto.titulo }}</h2>
-          <button v-on:click="addCarrinho(produto.id)">Adicionar</button>
           <input
             type="number"
-            :max="produto.produtos_qtd"
-            v-model="carrinhoData.data.qtd"
+            min="1"
+            :max="produto.produto_qtd"
+            v-model="produto.qtd"
+            v-on:change="addCarrinho(produto.produto_id, produto.qtd)"
           />
           <button v-on:click="deleteUmCarrinho(produto.id)">Excluir</button>
         </li>
