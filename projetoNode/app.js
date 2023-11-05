@@ -456,7 +456,7 @@ app.get('/getEnderecos/:id', (req, res) => {
 
 // Rota para cadastrar um novo endereço para um cliente específico
 app.post('/addEndereco/:id', (req, res) => {
-  const idCliente = req.params.idCliente;
+  const idCliente = req.params.id;
   const { cep, endereco, numero, complemento, bairro, cidade, estado } =
     req.body;
 
@@ -480,10 +480,25 @@ app.post('/addEndereco/:id', (req, res) => {
     }
     res
       .status(201)
+      .json(results) // Retorna os resultados em formato JSON
       .send('Novo endereço cadastrado para o cliente com sucesso!');
   });
 });
 
+// rotas de cartões
+// Rota para listar cartões por cliente
+app.get('/getCartoes/:id', (req, res) => {
+  const idCliente = req.params.id;
+  const query = 'SELECT * FROM cartoes WHERE idCliente = ?';
+
+  connection.query(query, idCliente, (error, results, fields) => {
+    if (error) {
+      res.status(500).send('Erro ao buscar cartões por cliente.');
+      throw error;
+    }
+    res.json(results); // Retorna os resultados em formato JSON
+  });
+});
 app.post('/teste', (req, res) => {
   console.log(req.body.teste);
 

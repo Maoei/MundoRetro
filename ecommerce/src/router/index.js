@@ -45,9 +45,21 @@ const router = createRouter({
       props: true,
     },
     {
-      path: '/enderecos/cadastro',
+      path: '/enderecos/cadastro/:id',
       name: 'enderecosCadastro',
       component: () => import('../views/EnderecosCadastroView.vue'),
+      props: true,
+    },
+    {
+      path: '/cartoes',
+      name: 'cartoes',
+      component: () => import('../views/CartoesView.vue'),
+      props: true,
+    },
+    {
+      path: '/cartoes/cadastro/:id',
+      name: 'cartoesCadastro',
+      component: () => import('../views/CartoesCadastroView.vue'),
       props: true,
     },
   ],

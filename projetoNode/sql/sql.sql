@@ -103,3 +103,33 @@ INSERT INTO enderecos (cep, endereco, numero, complemento, bairro, cidade, estad
 ('66666-777', 'Travessa da Paz', 80, 'Casa 8', 'Bairro Tranquilo', 'Cidade B', 'UF', 3),
 ('88888-999', 'Rua da Colina', 90, NULL, 'Bairro Alto', 'Cidade C', 'UF', 4),
 ('33333-444', 'Alameda das Flores', 100, 'Apartamento 10', 'Bairro das Flores', 'Cidade D', 'UF', 5);
+
+INSERT INTO cartoes (numeroCartao, nomeCartao, validade, codigoSeguranca, idCliente) 
+VALUES ('1234567890123456', 'João Silva', '12/25', 123, 1);
+
+INSERT INTO cartoes (numeroCartao, nomeCartao, validade, codigoSeguranca, idCliente) 
+VALUES ('9876543210987654', 'Maria Souza', '09/24', 456, 2);
+
+INSERT INTO cartoes (numeroCartao, nomeCartao, validade, codigoSeguranca, idCliente) 
+VALUES ('1111222233334444', 'Pedro Oliveira', '03/23', 789, 3);
+
+INSERT INTO cartoes (numeroCartao, nomeCartao, validade, codigoSeguranca, idCliente) 
+VALUES ('5555666677778888', 'Ana Santos', '08/26', 246, 4);
+
+INSERT INTO cartoes (numeroCartao, nomeCartao, validade, codigoSeguranca, idCliente) 
+VALUES ('9999888877776666', 'Mariana Pereira', '11/27', 135, 5);
+
+INSERT INTO cartoes (numeroCartao, nomeCartao, validade, codigoSeguranca, idCliente) 
+VALUES ('3333222211110000', 'Rafaela Carvalho', '06/25', 579, 1);
+
+INSERT INTO cartoes (numeroCartao, nomeCartao, validade, codigoSeguranca, idCliente) 
+VALUES ('4444333322221111', 'Carlos Mendes', '02/23', 852, 2);
+
+INSERT INTO cartoes (numeroCartao, nomeCartao, validade, codigoSeguranca, idCliente) 
+VALUES ('7777666655554444', 'Fernanda Rocha', '07/24', 963, 3);
+
+INSERT INTO cartoes (numeroCartao, nomeCartao, validade, codigoSeguranca, idCliente) 
+VALUES ('8888999911112222', 'Gustavo Fernandes', '04/23', 741, 4);
+
+INSERT INTO cartoes (numeroCartao, nomeCartao, validade, codigoSeguranca, idCliente) 
+VALUES ('6666555544443333', 'Larissa Gomes', '10/26', 258, 5);
