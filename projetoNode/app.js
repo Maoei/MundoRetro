@@ -100,8 +100,6 @@ app.post('/createUser', (req, res) => {
       }
     }
   );
-
-  connection.end();
 });
 
 // Endpoint to update a user
@@ -478,10 +476,8 @@ app.post('/addEndereco/:id', (req, res) => {
       res.status(500).send('Erro ao cadastrar novo endereço para o cliente.');
       throw error;
     }
-    res
-      .status(201)
-      .json(results) // Retorna os resultados em formato JSON
-      .send('Novo endereço cadastrado para o cliente com sucesso!');
+    res.status(201).json(results); // Retorna os resultados em formato JSON
+    //.send('Novo endereço cadastrado para o cliente com sucesso!');
   });
 });
 
@@ -499,6 +495,32 @@ app.get('/getCartoes/:id', (req, res) => {
     res.json(results); // Retorna os resultados em formato JSON
   });
 });
+
+//rota para adicionar novos cartões
+app.post('/addCartao/:id', (req, res) => {
+  const idCliente = req.params.id;
+  const { numeroCartao, nomeCartao, validade, codigoSeguranca } = req.body;
+
+  const INSERT_CARD_QUERY =
+    'INSERT INTO cartoes (numeroCartao, nomeCartao, validade, codigoSeguranca, idCliente) VALUES (?, ?, ?, ?, ?)';
+  const values = [
+    numeroCartao,
+    nomeCartao,
+    validade,
+    codigoSeguranca,
+    idCliente,
+  ];
+
+  connection.query(INSERT_CARD_QUERY, values, (error, results, fields) => {
+    if (error) {
+      res.status(500).send('Erro ao cadastrar novo cartão para o cliente.');
+      throw error;
+    }
+    res.status(201).json(results); // Retorna os resultados em formato JSON
+    //.send('Novo cartão cadastrado para o cliente com sucesso!');
+  });
+});
+
 app.post('/teste', (req, res) => {
   console.log(req.body.teste);
 

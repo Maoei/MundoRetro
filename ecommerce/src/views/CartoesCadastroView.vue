@@ -12,8 +12,7 @@ let exibir = false;
 onMounted(async () => {
   id = localStorage.id; // Captura o ID do Local Storage
   console.log('id ', id);
-
-  await getCartoes();
+  getCartoes();
 });
 
 async function getCartoes() {
@@ -30,19 +29,64 @@ async function getCartoes() {
       console.error('Erro ao enviar dados:', error);
     });
 }
+async function addCartao(data) {
+  try {
+    const response = await fetch(`http://localhost:3001/addCartao/${id}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    });
+
+    if (response.ok) {
+      const responseData = await response.json();
+      console.log('Resposta do backend:', responseData);
+      cartoesData.cartoes = responseData;
+      getCartoes();
+    } else {
+      throw new Error('Erro ao enviar dados');
+    }
+  } catch (error) {
+    console.error('Erro ao enviar dados:', error);
+  }
+}
+
+function submitForm() {
+  addCartao({ ...cartoesData }); // Envia os dados do formulário para a função addCartao
+}
 </script>
 
 <template v-if="exibir">
   <main>
-    <h>Lista de Endereços</h>
-    <div class="card-body">
-      <li v-for="cartao in cartoesData.cartoes">
-        {{ cartao.nomeCartao + '\n ' + endereco.numeroCartao }}
-      </li>
-      <RouterLink class="btn btn-primary" :to="'/cartoes/cadastro/' + id"
-        >Cadastrar Novo Endereço</RouterLink
-      >
-    </div>
+    <h1>Cadastro de Cartões</h1>
+    <form @submit.prevent="submitForm">
+      <div>
+        <label for="numeroCartao">Número do Cartão: </label>
+        <input
+          type="text"
+          id="numeroCartao"
+          v-model="cartoesData.numeroCartao"
+        />
+      </div>
+      <div>
+        <label for="nomeCartao">Nome no Cartão: </label>
+        <input type="text" id="nomeCartao" v-model="cartoesData.nomeCartao" />
+      </div>
+      <div>
+        <label for="validade">Validade: </label>
+        <input type="date" id="validade" v-model="cartoesData.validade" />
+      </div>
+      <div>
+        <label for="codigoSeguranca">Código de Segurança: </label>
+        <input
+          type="text"
+          id="codigoSeguranca"
+          v-model="cartoesData.codigoSeguranca"
+        />
+      </div>
+      <button type="submit">Cadastrar Cartão</button>
+    </form>
   </main>
 </template>
 

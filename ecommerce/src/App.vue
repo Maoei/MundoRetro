@@ -113,7 +113,13 @@ async function getUsers() {
                 >
               </li>
               <li><hr class="dropdown-divider" /></li>
-              <li><a class="dropdown-item" href="#">Something else here</a></li>
+              <li>
+                <a class="dropdown-item" href="#"
+                  ><RouterLink class="nav-link" to="/usuario/cadastro"
+                    >Cadastrar Novo Usuário</RouterLink
+                  ></a
+                >
+              </li>
             </ul>
           </li>
           <li class="nav-item">
