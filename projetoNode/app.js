@@ -342,7 +342,7 @@ app.get('/getCarrinho/:id', (req, res) => {
   const clienteId = req.params.id;
 
   const query = `
-    SELECT carrinho.*, produtos.qtd as produto_qtd, titulo
+    SELECT carrinho.*, produtos.qtd as produto_qtd, titulo, produtos.valor
     FROM carrinho
     JOIN produtos ON carrinho.produto_id = produtos.id
     WHERE carrinho.cliente_id = ?
@@ -499,8 +499,10 @@ app.get('/getCartoes/:id', (req, res) => {
 //rota para adicionar novos cartões
 app.post('/addCartao/:id', (req, res) => {
   const idCliente = req.params.id;
-  const { numeroCartao, nomeCartao, validade, codigoSeguranca } = req.body;
+  console.log('params.id ' + req.params.id);
 
+  const { numeroCartao, nomeCartao, validade, codigoSeguranca } = req.body;
+  console.log('body ' + numeroCartao);
   const INSERT_CARD_QUERY =
     'INSERT INTO cartoes (numeroCartao, nomeCartao, validade, codigoSeguranca, idCliente) VALUES (?, ?, ?, ?, ?)';
   const values = [
@@ -513,12 +515,87 @@ app.post('/addCartao/:id', (req, res) => {
 
   connection.query(INSERT_CARD_QUERY, values, (error, results, fields) => {
     if (error) {
-      res.status(500).send('Erro ao cadastrar novo cartão para o cliente.');
+      console.log('error ' + error);
+      res.status(500).send(error);
       throw error;
     }
     res.status(201).json(results); // Retorna os resultados em formato JSON
     //.send('Novo cartão cadastrado para o cliente com sucesso!');
   });
+});
+
+// rotas checkout
+// Rota para adicionar produtos no checkout e limpar o carrinho do cliente
+app.post('/checkout/finalizar', (req, res) => {
+  const {
+    idCliente,
+    valorFinal,
+    idEndereco,
+    idCartao1,
+    idCartao2,
+    valorCartao1,
+    valorCartao2,
+  } = req.body;
+  console.log('body ' + req.body.idCliente);
+  let status = 'EM PROCESSAMENTO';
+
+  if (idCliente) {
+    const novoProduto = {
+      valorFinal,
+      idEndereco,
+      idCartao1,
+      idCartao2,
+      valorCartao1,
+      valorCartao2,
+    };
+
+    const query =
+      'INSERT INTO checkout (valorFinal, idCliente, idEndereco, idCartao1, idCartao2, valorCartao1, valorCartao2, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?)';
+    connection.query(
+      query,
+      [
+        valorFinal,
+        idCliente,
+        idEndereco,
+        idCartao1,
+        idCartao2,
+        valorCartao1,
+        valorCartao2,
+        status,
+      ],
+      (error, results, fields) => {
+        if (error) {
+          res
+            .status(500)
+            .json({ error: 'Erro ao adicionar produto ao checkout' });
+        } else {
+          // Limpar o carrinho onde o ID do cliente é igual ao recebido na rota
+          const deleteQuery = 'DELETE FROM carrinho WHERE cliente_id = ?';
+          connection.query(
+            deleteQuery,
+            [idCliente],
+            (deleteError, deleteResults, deleteFields) => {
+              if (deleteError) {
+                res
+                  .status(500)
+                  .json({ error: 'Erro ao limpar o carrinho do cliente' });
+              } else {
+                res.status(200).json({
+                  message:
+                    'Produto adicionado ao checkout com sucesso e carrinho do cliente limpo!',
+                });
+              }
+            }
+          );
+        }
+      }
+    );
+  } else {
+    res.status(400).json({
+      error:
+        'Campos obrigatórios ausentes. Certifique-se de incluir todos os campos necessários e o ID do cliente.',
+    });
+  }
 });
 
 app.post('/teste', (req, res) => {

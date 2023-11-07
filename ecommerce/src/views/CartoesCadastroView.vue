@@ -53,6 +53,7 @@ async function addCartao(data) {
 }
 
 function submitForm() {
+  //cartoesData.validade = cartoesData.validade.slice(2);
   addCartao({ ...cartoesData }); // Envia os dados do formulário para a função addCartao
 }
 </script>
@@ -75,7 +76,7 @@ function submitForm() {
       </div>
       <div>
         <label for="validade">Validade: </label>
-        <input type="date" id="validade" v-model="cartoesData.validade" />
+        <input type="text" id="validade" v-model="cartoesData.validade" />
       </div>
       <div>
         <label for="codigoSeguranca">Código de Segurança: </label>

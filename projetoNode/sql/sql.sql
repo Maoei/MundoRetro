@@ -65,6 +65,22 @@ CREATE TABLE carrinho (
     FOREIGN KEY (produto_id) REFERENCES produtos(id)
 );
 
+CREATE TABLE checkout (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    valorFinal DECIMAL(10, 2) NOT NULL,
+	idCliente INT NOT NULL,
+	idEndereco INT NOT NULL,
+    idCartao1 INT NOT NULL,
+    idCartao2 INT NOT NULL,
+    valorCartao1 DECIMAL(10, 2) NOT NULL,
+    valorCartao2 DECIMAL(10, 2) NOT NULL,
+    status VARCHAR(20) NOT NULL,
+	FOREIGN KEY (idEndereco) REFERENCES enderecos(id),
+	FOREIGN KEY (idCartao1) REFERENCES cartoes(id),
+	FOREIGN KEY (idCartao1) REFERENCES cartoes(id),
+    FOREIGN KEY (idCliente) REFERENCES clientes(id)
+);
+
 --INSERT
 INSERT INTO clientes (nome, email, cpfcnpj, dtnascimento, usr, senha, genero, telefone) 
 VALUES 
@@ -91,6 +107,19 @@ VALUES
 (4, 'Jogo de Panelas', 'Conjunto de panelas antiaderentes', '2024-01-20', 'Casa', 79.99),
 (11, 'Escova Elétrica', 'Escova de dentes elétrica', '2024-02-25', 'Saúde', 24.99),
 (6, 'Teclado Mecânico', 'Teclado para jogos mecânico com LED', '2024-03-30', 'Tecnologia', 69.99);
+
+INSERT INTO produtos (qtd, titulo, descrProduto, dtCompra, genero, valor) VALUES 
+(5, 'Super Mario Bros', 'Jogo clássico do Mario para NES', '1990-05-18', 'Plataforma', 129.99),
+(12, 'The Legend of Zelda', 'Aventura épica para NES', '1987-08-22', 'Aventura', 39.99),
+(22, 'Sonic the Hedgehog', 'Ação rápida para Sega Genesis', '1991-06-23', 'Ação', 24.99),
+(8, 'Metroid', 'Ação-aventura para NES', '1986-08-06', 'Ação/Aventura', 34.99),
+(14, 'Donkey Kong Country', 'Aventura de plataforma para SNES', '1994-11-21', 'Plataforma', 99.99),
+(37, 'Mega Man 2', 'Ação desafiante para NES', '1989-06-08', 'Ação', 59.99),
+(9, 'Pac-Man', 'Clássico labirinto para Atari', '1982-03-15', 'Labirinto', 14.99),
+(8, 'Street Fighter II', 'Luta intensa para SNES', '1992-02-06', 'Luta', 29.99),
+(15, 'Tetris', 'Viciante quebra-cabeça para Game Boy', '1989-07-31', 'Quebra-cabeça', 39.99),
+(4, 'Castlevania', 'Ação sombria para NES', '1986-09-26', 'Ação', 39.99);
+
 
 INSERT INTO enderecos (cep, endereco, numero, complemento, bairro, cidade, estado, idCliente) VALUES
 ('12345-678', 'Rua Exemplo 1', 10, 'APTO 101', 'Centro', 'Cidade A', 'UF', 1),

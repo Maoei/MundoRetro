@@ -5,6 +5,27 @@ const carrinhoData = reactive({
   name: '',
   produtos: [],
   data: { qtd: 1 },
+  valorTotal: 0.0,
+});
+
+const cartoesData = reactive({
+  name: '',
+  cartoes: [],
+});
+
+const enderecoData = reactive({
+  name: '',
+  enderecos: [],
+});
+
+const checkoutData = reactive({
+  valorFinal: 0,
+  idEndereco: '',
+  idCliente: localStorage.id,
+  idCartao1: '',
+  idCartao2: '',
+  valorCartao1: 0,
+  valorCartao2: 0,
 });
 
 let id = '';
@@ -15,7 +36,26 @@ onMounted(async () => {
   console.log('id ', id);
 
   await getCarrinho(); // Chama getCarrinho
+  await getEnderecos();
+  await getCartoes();
 });
+
+async function addCheckOut() {
+  fetch(`http://localhost:3001/checkout/finalizar`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(checkoutData),
+  })
+    .then((response) => response)
+    .then((data) => {
+      console.log('Resposta do backend:', data);
+    })
+    .catch((error) => {
+      console.error('Erro ao enviar dados:', error);
+    });
+}
 
 async function getCarrinho() {
   fetch(`http://localhost:3001/getCarrinho/` + id, {
@@ -25,6 +65,12 @@ async function getCarrinho() {
     .then((data) => {
       console.log('Resposta do backend:', data);
       carrinhoData.produtos = data;
+      carrinhoData.produtos.forEach((item) => {
+        carrinhoData.valorTotal += Number(item.valor) * Number(item.qtd);
+        //console.log(value);
+        console.log(item.valor);
+        console.log(item.qtd);
+      });
       exibir = true;
     })
     .catch((error) => {
@@ -32,46 +78,29 @@ async function getCarrinho() {
     });
 }
 
-async function deleteUmCarrinho(id) {
-  // Remove o item do carrinho via API (necessário ajustar a chamada para enviar o ID correto)
-  fetch(`http://localhost:3001/removeFromCarrinho/${id}`, {
-    method: 'DELETE',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ clienteId: localStorage.id }),
+async function getEnderecos() {
+  fetch('http://localhost:3001/getEnderecos/' + id, {
+    method: 'GET',
   })
-    .then((response) => response)
+    .then((response) => response.json())
     .then((data) => {
       console.log('Resposta do backend:', data);
-      getCarrinho(id);
+      enderecoData.enderecos = data;
+      exibir = true;
     })
     .catch((error) => {
       console.error('Erro ao enviar dados:', error);
     });
 }
-
-async function updateCarrinho(id, qtd) {
-  console.log(id, qtd);
-}
-
-async function addCarrinho(id, qtd) {
-  carrinhoData.data.produtoId = id;
-  carrinhoData.data.clienteId = localStorage.id;
-  carrinhoData.data.qtd = qtd;
-
-  console.log(carrinhoData.data);
-  fetch('http://localhost:3001/add-to-cart/', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(carrinhoData.data),
+async function getCartoes() {
+  fetch('http://localhost:3001/getCartoes/' + id, {
+    method: 'GET',
   })
-    .then((response) => response)
+    .then((response) => response.json())
     .then((data) => {
       console.log('Resposta do backend:', data);
-      getCarrinho();
+      cartoesData.cartoes = data;
+      exibir = true;
     })
     .catch((error) => {
       console.error('Erro ao enviar dados:', error);
@@ -81,7 +110,7 @@ async function addCarrinho(id, qtd) {
 
 <template v-if="exibir">
   <main>
-    <h1>Carrinho</h1>
+    <h1>CheckOut</h1>
     <div class="card-body">
       <ul>
         <li v-for="produto in carrinhoData.produtos" :key="produto.id">
@@ -91,11 +120,56 @@ async function addCarrinho(id, qtd) {
             min="1"
             :max="produto.produto_qtd"
             v-model="produto.qtd"
+            readonly
             v-on:change="addCarrinho(produto.produto_id, produto.qtd)"
           />
-          <button v-on:click="deleteUmCarrinho(produto.id)">Excluir</button>
         </li>
       </ul>
     </div>
+    <div>
+      <h3>Valor Total</h3>
+      <h2>{{ carrinhoData.valorTotal }}</h2>
+    </div>
+    <div>
+      <h1>Selecione o Endereço</h1>
+      <select name="" id="cartao" v-model="checkoutData.idEndereco">
+        <option v-for="endereco in enderecoData.enderecos" :value="endereco.id">
+          {{ endereco.endereco }}
+        </option>
+      </select>
+    </div>
+    <div>
+      <h1>Selecione o Método de Pagamento</h1>
+      <h2>Escolha o Cartão 1</h2>
+      <select name="" id="cartao1" v-model="checkoutData.idCartao1">
+        <option v-for="cartao in cartoesData.cartoes" :value="cartao.id">
+          {{ cartao.numeroCartao }}
+        </option>
+      </select>
+      <h2>Valor a Pagar no Cartão 1</h2>
+      <input
+        type="number"
+        v-model="checkoutData.valorCartao1"
+        min="0"
+        :max="carrinhoData.valorTotal"
+      />
+
+      <div>
+        <h2>Escolha o Cartão 2</h2>
+        <select name="" id="cartao2" v-model="checkoutData.idCartao2">
+          <option v-for="cartao in cartoesData.cartoes" :value="cartao.id">
+            {{ cartao.numeroCartao }}
+          </option>
+        </select>
+        <h2>Valor a Pagar no Cartão 2</h2>
+        <input
+          type="number"
+          v-model="checkoutData.valorCartao2"
+          :min="0"
+          :max="carrinhoData.valorTotal - checkoutData.valorCartao1"
+        />
+      </div>
+    </div>
+    <button v-on:click="addCheckOut()">Finalizar</button>
   </main>
 </template>

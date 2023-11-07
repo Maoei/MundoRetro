@@ -91,7 +91,7 @@ async function getUsers() {
             <RouterLink class="nav-link" to="/produtos">Produtos</RouterLink>
           </li>
           <li class="nav-item">
-            <RouterLink class="nav-link" to="/checkout">Carrinho</RouterLink>
+            <RouterLink class="nav-link" to="/carrinho">Carrinho</RouterLink>
           </li>
           <li class="nav-item dropdown">
             <a
