@@ -25,7 +25,7 @@ Abaixo, a lista de STATUS possíveis para um pedido:
 EM PROCESSAMENTO;
 PEDIDO APROVADO;
 PAGAMENTO RECUSADO;
-EM TRÂNSITO; 
+EM TRÂNSITO;
 ENTREGUE;
 TROCA SOLICITADA;
 TROCA APROVADA;
@@ -38,3 +38,5 @@ Um pedido com TROCA SOLICITADA poderá ter sua troca aprovada pelo administrador
 O cliente pode verificar o status atualizado do seu pedido a qualquer momento.
 
 No caso da troca recusada, o administrador deve informar o motivo da recusa.
+
+Parte do ADMIN por enquanto deve focar mais em trocar as situações do pedido.

@@ -524,51 +524,89 @@ app.post('/addCartao/:id', (req, res) => {
   });
 });
 
-// rotas checkout
-// Rota para adicionar produtos no checkout e limpar o carrinho do cliente
 app.post('/checkout/finalizar', (req, res) => {
-  const {
-    idCliente,
-    valorFinal,
-    idEndereco,
-    idCartao1,
-    idCartao2,
-    valorCartao1,
-    valorCartao2,
-  } = req.body;
+  const { idCliente, valorFinal, idEndereco, pagamentos } = req.body;
   console.log('body ' + req.body.idCliente);
+
   let status = 'EM PROCESSAMENTO';
 
-  if (idCliente) {
-    const novoProduto = {
-      valorFinal,
-      idEndereco,
-      idCartao1,
-      idCartao2,
-      valorCartao1,
-      valorCartao2,
-    };
-
-    const query =
-      'INSERT INTO checkout (valorFinal, idCliente, idEndereco, idCartao1, idCartao2, valorCartao1, valorCartao2, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?)';
+  if (
+    idCliente &&
+    valorFinal &&
+    idEndereco &&
+    pagamentos &&
+    pagamentos.length > 0
+  ) {
+    const checkoutQuery =
+      'INSERT INTO checkout (valorFinal, idCliente, idEndereco, status) VALUES (?, ?, ?, ?)';
     connection.query(
-      query,
-      [
-        valorFinal,
-        idCliente,
-        idEndereco,
-        idCartao1,
-        idCartao2,
-        valorCartao1,
-        valorCartao2,
-        status,
-      ],
-      (error, results, fields) => {
-        if (error) {
-          res
-            .status(500)
-            .json({ error: 'Erro ao adicionar produto ao checkout' });
+      checkoutQuery,
+      [valorFinal, idCliente, idEndereco, status],
+      (checkoutError, checkoutResults, checkoutFields) => {
+        if (checkoutError) {
+          res.status(500).json({ error: 'Erro ao finalizar o checkout' });
         } else {
+          const checkoutId = checkoutResults.insertId;
+          let count = 0;
+
+          // Iterar sobre os pagamentos e inserir cada um
+          pagamentos.forEach((pagamento) => {
+            const insertCheckoutPagamentosQuery =
+              'INSERT INTO checkoutPagamentos (idCheckOut, idProduto, idEndereco, valorProduto, status, idCartao, numeroCartao, valorCartao) VALUES (?, ?, ?, ?, ?, ?, ?, ?)';
+            connection.query(
+              insertCheckoutPagamentosQuery,
+              [
+                checkoutId,
+                pagamento.idProduto,
+                idEndereco,
+                pagamento.valorProduto,
+                status,
+                pagamento.idCartao,
+                pagamento.numeroCartao,
+                pagamento.valorCartao,
+              ],
+              (pagamentosError, pagamentosResults, pagamentosFields) => {
+                if (pagamentosError) {
+                  console.error(
+                    'Erro ao adicionar informações do cartão:',
+                    pagamentosError
+                  );
+                  res.status(500).json({
+                    error: 'Erro ao adicionar informações do cartão',
+                  });
+                } else {
+                  if (count == 0) {
+                    count++;
+                    // Adicionar produtos à tabela checkoutProdutos
+                    const insertCheckoutProdutosQuery =
+                      'INSERT INTO checkoutProdutos (idProduto, idCheckOut, valorProduto, status, qtd) VALUES (?, ?, ?, ?, ?)';
+                    connection.query(
+                      insertCheckoutProdutosQuery,
+                      [
+                        pagamento.idProduto,
+                        checkoutId,
+                        pagamento.valorProduto,
+                        status,
+                        pagamento.qtd,
+                      ],
+                      (produtosError, produtosResults, produtosFields) => {
+                        if (produtosError) {
+                          console.error(
+                            'Erro ao adicionar produto ao checkout:',
+                            produtosError
+                          );
+                          res.status(500).json({
+                            error: 'Erro ao adicionar produto ao checkout',
+                          });
+                        }
+                      }
+                    );
+                  }
+                }
+              }
+            );
+          });
+
           // Limpar o carrinho onde o ID do cliente é igual ao recebido na rota
           const deleteQuery = 'DELETE FROM carrinho WHERE cliente_id = ?';
           connection.query(
@@ -582,7 +620,7 @@ app.post('/checkout/finalizar', (req, res) => {
               } else {
                 res.status(200).json({
                   message:
-                    'Produto adicionado ao checkout com sucesso e carrinho do cliente limpo!',
+                    'Checkout concluído com sucesso, carrinho do cliente limpo!',
                 });
               }
             }
@@ -596,6 +634,71 @@ app.post('/checkout/finalizar', (req, res) => {
         'Campos obrigatórios ausentes. Certifique-se de incluir todos os campos necessários e o ID do cliente.',
     });
   }
+});
+
+//rota da tabela checkoutProdutos
+app.get('/getCheckoutProdutos', (req, res) => {
+  console.log(req.body);
+  console.log('testes');
+  // Query to fetch all products
+  const selectQuery = `SELECT checkoutProdutos.idProduto, checkoutProdutos.idCheckOut, checkoutProdutos.valorProduto, checkoutProdutos.status,
+            produtos.qtd, produtos.titulo, produtos.descrProduto, produtos.dtCompra, produtos.genero, produtos.valor 
+    FROM checkoutProdutos 
+    JOIN produtos ON produtos.id = checkoutProdutos.idProduto`;
+
+  // Run the query
+  connection.query(selectQuery, (error, results) => {
+    if (error) {
+      res.status(500).send('Error fetching products');
+      throw error;
+    }
+    res.status(200).json(results);
+  });
+});
+
+app.get('/getCheckoutProdutos/:id', (req, res) => {
+  const idCheckout = req.params.idCheckout;
+  console.log('idCheckout ' + idCheckout);
+  // Query to fetch products for a specific idCheckout
+  const selectQuery = `SELECT checkoutProdutos.idProduto, checkoutProdutos.idCheckOut, checkoutProdutos.valorProduto, checkoutProdutos.status,
+    produtos.qtd, produtos.titulo, produtos.descrProduto, produtos.dtCompra, produtos.genero, produtos.valor 
+    FROM checkoutProdutos 
+    JOIN produtos ON produtos.id = checkoutProdutos.idProduto
+    WHERE checkoutProdutos.idCheckOut = ?`;
+
+  // Run the query with the specified idCheckout
+  connection.query(selectQuery, [idCheckout], (error, results) => {
+    if (error) {
+      res
+        .status(500)
+        .send('Error fetching products for the specified idCheckout');
+      throw error;
+    }
+    res.status(200).json(results);
+  });
+});
+
+//rota para validar cupom
+app.get('/getCheckoutProdutos/:id', (req, res) => {
+  const idCheckout = req.params.idCheckout;
+  console.log('idCheckout ' + idCheckout);
+  // Query to fetch products for a specific idCheckout
+  const selectQuery = `SELECT checkoutProdutos.idProduto, checkoutProdutos.idCheckOut, checkoutProdutos.valorProduto, checkoutProdutos.status,
+    produtos.qtd, produtos.titulo, produtos.descrProduto, produtos.dtCompra, produtos.genero, produtos.valor 
+    FROM checkoutProdutos 
+    JOIN produtos ON produtos.id = checkoutProdutos.idProduto
+    WHERE checkoutProdutos.idCheckOut = ?`;
+
+  // Run the query with the specified idCheckout
+  connection.query(selectQuery, [idCheckout], (error, results) => {
+    if (error) {
+      res
+        .status(500)
+        .send('Error fetching products for the specified idCheckout');
+      throw error;
+    }
+    res.status(200).json(results);
+  });
 });
 
 app.post('/teste', (req, res) => {

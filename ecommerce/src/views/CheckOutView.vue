@@ -22,10 +22,12 @@ const checkoutData = reactive({
   valorFinal: 0,
   idEndereco: '',
   idCliente: localStorage.id,
-  idCartao1: '',
-  idCartao2: '',
-  valorCartao1: 0,
-  valorCartao2: 0,
+  idProduto: '',
+  numeroCartao: '',
+  valorProduto: 0,
+  cartoes: [{}],
+  qtdCartoes: 0,
+  cupom: '',
 });
 
 let id = '';
@@ -41,14 +43,59 @@ onMounted(async () => {
 });
 
 async function addCheckOut() {
+  console.log('checkoutData.cartoes ' + checkoutData.cartoes);
+  let checkTotal = 0;
+  const pagamentosArray = []; // Create an array to hold the pagamentos objects
+  console.log('cartoesData.cartoes: ' + cartoesData.cartoes);
+  console.log('carrinhoData.produtos: ' + carrinhoData.produtos);
+
+  checkoutData.cartoes.forEach((value, index) => {
+    checkTotal += value.valor;
+    console.log('value ' + value.id.numeroCartao);
+
+    carrinhoData.produtos.forEach((item) => {
+      console.log('item ' + item.produto_id);
+      const pagamentoObj = {
+        idProduto: item.produto_id,
+        idCartao: value.id.id,
+        valorCartao: value.valor,
+        numeroCartao: value.id.numeroCartao,
+        valorProduto: item.valor,
+        qtd: item.qtd,
+      };
+      pagamentosArray.push(pagamentoObj);
+
+      console.log(
+        `checkoutData - Cartão ${index + 1}: ID Produto - ${
+          pagamentoObj.idProduto
+        }, ID Cartão - ${pagamentoObj.idCartao}, Valor - ${
+          pagamentoObj.valorCartao
+        }, Valor Produto - ${pagamentoObj.valorProduto}`
+      );
+    });
+  });
+
+  if (checkTotal != carrinhoData.valorTotal) {
+    console.log('Valor não é igual ao total: ' + checkTotal);
+  } else {
+    console.log('Valor é igual ao total:  ' + checkTotal);
+  }
+
+  const requestBody = {
+    idCliente: checkoutData.idCliente,
+    valorFinal: carrinhoData.valorTotal,
+    idEndereco: checkoutData.idEndereco,
+    pagamentos: pagamentosArray, // Pass the array of pagamentos objects
+  };
+  console.log('requestBody ' + requestBody.pagamentos[0].idProduto);
   fetch(`http://localhost:3001/checkout/finalizar`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify(checkoutData),
+    body: JSON.stringify(requestBody),
   })
-    .then((response) => response)
+    .then((response) => response.json())
     .then((data) => {
       console.log('Resposta do backend:', data);
     })
@@ -71,6 +118,7 @@ async function getCarrinho() {
         console.log(item.valor);
         console.log(item.qtd);
       });
+      carrinhoData.valorTotal = Math.ceil(carrinhoData.valorTotal);
       exibir = true;
     })
     .catch((error) => {
@@ -101,6 +149,47 @@ async function getCartoes() {
       console.log('Resposta do backend:', data);
       cartoesData.cartoes = data;
       exibir = true;
+    })
+    .catch((error) => {
+      console.error('Erro ao enviar dados:', error);
+    });
+}
+
+function addCartao() {
+  checkoutData.qtdCartoes++;
+  checkoutData.cartoes[checkoutData.qtdCartoes] = { id: '', valor: '' };
+
+  console.log(checkoutData.qtdCartoes);
+}
+
+function removeCartao() {
+  if (checkoutData.qtdCartoes > 0) {
+    checkoutData.cartoes.splice(
+      checkoutData.qtdCartoes,
+      checkoutData.qtdCartoes
+    );
+    checkoutData.qtdCartoes--;
+  }
+}
+
+function validarCupom() {
+  console.log('cupom ' + checkoutData.cupom);
+
+  const requestBody = {
+    idCliente: checkoutData.idCliente,
+    cupom: checkoutData.cupom,
+  };
+
+  fetch(`http://localhost:3001/validarCupom/`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(requestBody),
+  })
+    .then((response) => response.json())
+    .then((data) => {
+      console.log('Resposta do backend:', data);
     })
     .catch((error) => {
       console.error('Erro ao enviar dados:', error);
@@ -140,35 +229,49 @@ async function getCartoes() {
     </div>
     <div>
       <h1>Selecione o Método de Pagamento</h1>
-      <h2>Escolha o Cartão 1</h2>
-      <select name="" id="cartao1" v-model="checkoutData.idCartao1">
-        <option v-for="cartao in cartoesData.cartoes" :value="cartao.id">
+      <h2>Escolha o Cartão</h2>
+      <select name="" id="cartao_0" v-model="checkoutData.cartoes[0].id">
+        <option v-for="cartao in cartoesData.cartoes" :value="cartao">
           {{ cartao.numeroCartao }}
         </option>
       </select>
-      <h2>Valor a Pagar no Cartão 1</h2>
+      <h2>Valor a Pagar no Cartão</h2>
       <input
         type="number"
-        v-model="checkoutData.valorCartao1"
+        v-model="checkoutData.cartoes[0].valor"
         min="0"
         :max="carrinhoData.valorTotal"
       />
-
       <div>
-        <h2>Escolha o Cartão 2</h2>
-        <select name="" id="cartao2" v-model="checkoutData.idCartao2">
-          <option v-for="cartao in cartoesData.cartoes" :value="cartao.id">
+        <button v-on:click="addCartao()">Adicionar Cartão</button>
+        <button v-on:click="removeCartao()">Remover Cartão</button>
+      </div>
+      <div v-for="(val, index) in checkoutData.qtdCartoes">
+        <h2>Escolha o Cartão</h2>
+        <select
+          :name="'cartao_' + val"
+          :id="'cartao_' + val"
+          v-model="checkoutData.cartoes[val].id"
+          :max="carrinhoData.valorTotal"
+          :min="0"
+        >
+          <option v-for="cartao in cartoesData.cartoes" :value="cartao">
             {{ cartao.numeroCartao }}
           </option>
         </select>
-        <h2>Valor a Pagar no Cartão 2</h2>
+        <h2>Valor a Pagar no Cartão</h2>
         <input
           type="number"
-          v-model="checkoutData.valorCartao2"
+          v-model="checkoutData.cartoes[val].valor"
           :min="0"
-          :max="carrinhoData.valorTotal - checkoutData.valorCartao1"
+          :max="carrinhoData.valorTotal - checkoutData.cartoes[0].valor"
         />
       </div>
+    </div>
+    <div>
+      <input type="text" v-model="checkoutData.cupom" /> Insira o código do
+      cupom
+      <button v-on:click="validarCupom()">Validar Cupom</button>
     </div>
     <button v-on:click="addCheckOut()">Finalizar</button>
   </main>

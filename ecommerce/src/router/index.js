@@ -68,6 +68,18 @@ const router = createRouter({
       component: () => import('../views/UsuarioCadastroView.vue'),
       props: true,
     },
+    {
+      path: '/admin',
+      name: 'admin',
+      component: () => import('../views/AdminProdutoView.vue'),
+      props: true,
+    },
+    {
+      path: '/admin/produto/:id',
+      name: 'adminProduto',
+      component: () => import('../views/AdminProdutoDetalheView.vue'),
+      props: true,
+    },
   ],
 });
 

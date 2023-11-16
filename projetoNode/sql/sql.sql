@@ -70,15 +70,35 @@ CREATE TABLE checkout (
     valorFinal DECIMAL(10, 2) NOT NULL,
 	idCliente INT NOT NULL,
 	idEndereco INT NOT NULL,
-    idCartao1 INT NOT NULL,
-    idCartao2 INT NOT NULL,
-    valorCartao1 DECIMAL(10, 2) NOT NULL,
-    valorCartao2 DECIMAL(10, 2) NOT NULL,
     status VARCHAR(20) NOT NULL,
 	FOREIGN KEY (idEndereco) REFERENCES enderecos(id),
-	FOREIGN KEY (idCartao1) REFERENCES cartoes(id),
-	FOREIGN KEY (idCartao1) REFERENCES cartoes(id),
     FOREIGN KEY (idCliente) REFERENCES clientes(id)
+);
+
+CREATE TABLE checkoutPagamentos (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    idProduto INT NOT NULL,
+	idCheckOut INT NOT NULL,
+	idEndereco INT,
+    valorProduto DECIMAL(10, 2) NOT NULL,
+    status VARCHAR(20) NOT NULL,
+	idCartao INT,
+    numeroCartao VARCHAR(20),
+    valorCartao DECIMAL(10, 2) NOT NULL,
+	FOREIGN KEY (idEndereco) REFERENCES enderecos(id) ON DELETE SET NULL,
+	FOREIGN KEY (idCartao) REFERENCES cartoes(id) ON DELETE SET NULL,
+	FOREIGN KEY (idProduto) REFERENCES produtos(id),
+	FOREIGN KEY (idCheckOut) REFERENCES checkout(id) 
+);
+
+CREATE TABLE checkoutProdutos (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    idProduto INT NOT NULL,
+	idCheckOut INT NOT NULL,
+    valorProduto DECIMAL(10, 2) NOT NULL,
+    status VARCHAR(20) NOT NULL,
+	FOREIGN KEY (idProduto) REFERENCES produtos(id),
+	FOREIGN KEY (idCheckOut) REFERENCES checkout(id) 
 );
 
 --INSERT
