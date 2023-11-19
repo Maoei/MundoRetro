@@ -679,8 +679,8 @@ app.get('/getCheckoutProdutos/:id', (req, res) => {
 });
 
 //rota para validar cupom
-app.get('/getCheckoutProdutos/:id', (req, res) => {
-  const idCheckout = req.params.idCheckout;
+app.get('/getCheckoutProdutosDetalhe/:id', (req, res) => {
+  const idCheckout = req.params.id;
   console.log('idCheckout ' + idCheckout);
   // Query to fetch products for a specific idCheckout
   const selectQuery = `SELECT checkoutProdutos.idProduto, checkoutProdutos.idCheckOut, checkoutProdutos.valorProduto, checkoutProdutos.status,
@@ -698,6 +698,149 @@ app.get('/getCheckoutProdutos/:id', (req, res) => {
       throw error;
     }
     res.status(200).json(results);
+  });
+});
+
+// Rota para validar o cupom
+app.post('/validarCupom', (req, res) => {
+  console.log(req.body);
+
+  const idCliente = req.body.idCliente;
+  const codigoCupom = req.body.cupom;
+  const valorTotal = req.body.valorTotal;
+
+  console.log('idCliente ' + idCliente);
+  console.log('codigoCupom ' + codigoCupom);
+  console.log('valorTotal ' + valorTotal);
+
+  // Consulta ao banco de dados para validar o cupom
+  const query = `SELECT * FROM cupons WHERE codigoCupon = ? AND idCliente = ?`;
+
+  connection.query(
+    query,
+    [codigoCupom, idCliente],
+    (error, results, fields) => {
+      if (error) {
+        res.status(500).json({ error: 'Erro interno do servidor' });
+        return;
+      }
+
+      if (results.length > 0) {
+        // Cupom válido
+        const cupom = results[0];
+        const desconto = parseFloat(cupom.valor);
+
+        // Aplica o desconto no valor total do checkout
+        const valorFinal = valorTotal - desconto;
+
+        // Insere o valor final com desconto na tabela checkout
+        const insertQuery = `INSERT INTO checkout (valorFinal, idCliente, idEndereco, status) VALUES (?, ?, ?, ?, ?)`;
+
+        connection.query(
+          insertQuery,
+          [valorFinal, idCliente, idEndereco, 'EM PROCESSAMENTO'],
+          (insertError, insertResults, insertFields) => {
+            if (insertError) {
+              res
+                .status(500)
+                .json({ error: 'Erro ao inserir na tabela checkout' });
+              return;
+            }
+
+            res.json({ mensagem: 'Cupom válido', valorFinal });
+          }
+        );
+      } else {
+        // Cupom inválido
+        res.json({ mensagem: 'Cupom inválido', valorFinal: valorTotal });
+      }
+    }
+  );
+});
+
+// Rota para trocar o status da compra pelo Admin
+app.post('/trocarStatus', (req, res) => {
+  const idCheckOut = req.body.idCheckOut;
+  const novoStatus = req.body.status;
+
+  console.log('idCheckOut ' + idCheckOut);
+  console.log('novoStatus ' + novoStatus);
+
+  // Query to update the status in checkout table
+  const updateCheckoutQuery = `UPDATE checkout SET status = ? WHERE id = ?`;
+
+  // Query to update the status in checkoutProdutos table
+  const updateCheckoutProdutosQuery = `UPDATE checkoutProdutos SET status = ? WHERE idCheckOut = ?`;
+
+  // Query to update the status in checkoutPagamentos table
+  const updateCheckoutPagamentosQuery = `UPDATE checkoutPagamentos SET status = ? WHERE idCheckOut = ?`;
+
+  // Run the update queries
+  connection.beginTransaction((err) => {
+    if (err) {
+      res.status(500).send('Error updating status. Transaction start failed.');
+      throw err;
+    }
+
+    connection.query(
+      updateCheckoutQuery,
+      [novoStatus, idCheckOut],
+      (error, results) => {
+        if (error) {
+          connection.rollback(() => {
+            res.status(500).send('Error updating status in checkout table.');
+            throw error;
+          });
+        }
+
+        connection.query(
+          updateCheckoutProdutosQuery,
+          [novoStatus, idCheckOut],
+          (error, results) => {
+            if (error) {
+              connection.rollback(() => {
+                res
+                  .status(500)
+                  .send('Error updating status in checkoutProdutos table.');
+                throw error;
+              });
+            }
+
+            connection.query(
+              updateCheckoutPagamentosQuery,
+              [novoStatus, idCheckOut],
+              (error, results) => {
+                if (error) {
+                  connection.rollback(() => {
+                    res
+                      .status(500)
+                      .send(
+                        'Error updating status in checkoutPagamentos table.'
+                      );
+                    throw error;
+                  });
+                }
+
+                connection.commit((err) => {
+                  if (err) {
+                    connection.rollback(() => {
+                      res.status(500).send('Error committing transaction.');
+                      throw err;
+                    });
+                  }
+
+                  res
+                    .status(200)
+                    .json({
+                      message: 'Status updated successfully in all tables.',
+                    });
+                });
+              }
+            );
+          }
+        );
+      }
+    );
   });
 });
 

@@ -88,6 +88,7 @@ async function addCheckOut() {
     pagamentos: pagamentosArray, // Pass the array of pagamentos objects
   };
   console.log('requestBody ' + requestBody.pagamentos[0].idProduto);
+  return 0;
   fetch(`http://localhost:3001/checkout/finalizar`, {
     method: 'POST',
     headers: {
@@ -174,13 +175,19 @@ function removeCartao() {
 
 function validarCupom() {
   console.log('cupom ' + checkoutData.cupom);
+  console.log('idCliente ' + checkoutData.idCliente);
+  console.log('valortotal ' + carrinhoData.valorTotal);
 
   const requestBody = {
     idCliente: checkoutData.idCliente,
     cupom: checkoutData.cupom,
+    valorTotal: carrinhoData.valorTotal,
   };
+  return 0;
+  console.log('cupom ' + requestBody.cupom);
+  console.log('idCliente ' + requestBody.idCliente);
 
-  fetch(`http://localhost:3001/validarCupom/`, {
+  fetch(`http://localhost:3001/validarCupom`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',

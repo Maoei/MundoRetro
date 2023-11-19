@@ -1,5 +1,6 @@
 <script setup>
 import { ref, onMounted, reactive } from 'vue';
+import { useRoute } from 'vue-router';
 
 const checkoutProdutosData = reactive({
   name: '',
@@ -8,17 +9,17 @@ const checkoutProdutosData = reactive({
 
 let id = '';
 let exibir = false;
+const route = useRoute();
 
 onMounted(async () => {
-  id = checkoutProdutosData.produtos.idCheckOut;
+  id = route.params.id;
   console.log('Id: ' + id);
 
-  await getCheckoutProdutos();
   getCheckoutProdutosDetalhe();
 });
 
-async function getCheckoutProdutos() {
-  fetch('http://localhost:3001/getCheckoutProdutos', {
+function getCheckoutProdutosDetalhe() {
+  fetch('http://localhost:3001/getCheckoutProdutosDetalhe/' + id, {
     method: 'GET',
   })
     .then((response) => response.json())
@@ -32,15 +33,26 @@ async function getCheckoutProdutos() {
     });
 }
 
-function getCheckoutProdutosDetalhe() {
-  fetch('http://localhost:3001/getCheckoutProdutos/' + id, {
-    method: 'GET',
+function trocarStatus(produto) {
+  let status = produto.status;
+
+  const requestBody = {
+    idCheckOut: id,
+    status: status,
+  };
+  console.log('status ' + requestBody.status);
+  console.log('idCheckOut ' + requestBody.idCheckOut);
+
+  fetch(`http://localhost:3001/trocarStatus`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(requestBody),
   })
     .then((response) => response.json())
     .then((data) => {
       console.log('Resposta do backend:', data);
-      checkoutProdutosData.produtos = data;
-      exibir = true;
     })
     .catch((error) => {
       console.error('Erro ao enviar dados:', error);
@@ -92,8 +104,15 @@ function getCheckoutProdutosDetalhe() {
               </select>
             </div>
             <div>
-              <button type="submit">Cancelar</button>
-              <button type="submit">Salvar</button>
+              <button type="submit">
+                <RouterLink :to="'/admin'">Cancelar</RouterLink>
+              </button>
+              <button
+                type="submit"
+                @click="trocarStatus(checkoutProdutosData.produtos[0])"
+              >
+                <RouterLink :to="'/admin'">Salvar</RouterLink>
+              </button>
             </div>
           </div>
         </div>
