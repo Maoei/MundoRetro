@@ -80,6 +80,30 @@ const router = createRouter({
       component: () => import('../views/AdminProdutoDetalheView.vue'),
       props: true,
     },
+    {
+      path: '/conta/:id',
+      name: 'dadosConta',
+      component: () => import('../views/DadosConta.vue'),
+      props: true,
+    },
+    {
+      path: '/cupons-disponiveis',
+      name: 'cuponsDisponiveis',
+      component: () => import('../views/CuponsDisponiveisView.vue'),
+      props: true,
+    },
+    {
+      path: '/cupons-expirados',
+      name: 'cuponsExpirados',
+      component: () => import('../views/CuponsExpiradosView.vue'),
+      props: true,
+    },
+    {
+      path: '/pedidos',
+      name: 'pedidos',
+      component: () => import('../views/PedidosView.vue'),
+      props: true,
+    },
   ],
 });
 

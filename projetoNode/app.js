@@ -525,8 +525,16 @@ app.post('/addCartao/:id', (req, res) => {
 });
 
 app.post('/checkout/finalizar', (req, res) => {
-  const { idCliente, valorFinal, idEndereco, pagamentos } = req.body;
-  console.log('body ' + req.body.idCliente);
+  const {
+    idCliente,
+    valorFinal,
+    idEndereco,
+    valorPago,
+    valorDesconto,
+    valorFrete,
+    pagamentos,
+  } = req.body;
+  console.log('body ' + req.body.valorPago);
 
   let status = 'EM PROCESSAMENTO';
 
@@ -535,13 +543,24 @@ app.post('/checkout/finalizar', (req, res) => {
     valorFinal &&
     idEndereco &&
     pagamentos &&
+    valorPago &&
+    valorFrete &&
     pagamentos.length > 0
   ) {
+    let total = valorFinal + valorFrete;
     const checkoutQuery =
-      'INSERT INTO checkout (valorFinal, idCliente, idEndereco, status) VALUES (?, ?, ?, ?)';
+      'INSERT INTO checkout (valorFinal, idCliente, idEndereco, status, valorPago, valorDesconto, valorFrete) VALUES (?, ?, ?, ?, ?, ?, ?)';
     connection.query(
       checkoutQuery,
-      [valorFinal, idCliente, idEndereco, status],
+      [
+        total,
+        idCliente,
+        idEndereco,
+        status,
+        valorPago,
+        valorDesconto,
+        valorFrete,
+      ],
       (checkoutError, checkoutResults, checkoutFields) => {
         if (checkoutError) {
           res.status(500).json({ error: 'Erro ao finalizar o checkout' });
@@ -703,15 +722,11 @@ app.get('/getCheckoutProdutosDetalhe/:id', (req, res) => {
 
 // Rota para validar o cupom
 app.post('/validarCupom', (req, res) => {
-  console.log(req.body);
-
   const idCliente = req.body.idCliente;
   const codigoCupom = req.body.cupom;
-  const valorTotal = req.body.valorTotal;
 
   console.log('idCliente ' + idCliente);
   console.log('codigoCupom ' + codigoCupom);
-  console.log('valorTotal ' + valorTotal);
 
   // Consulta ao banco de dados para validar o cupom
   const query = `SELECT * FROM cupons WHERE codigoCupon = ? AND idCliente = ?`;
@@ -727,32 +742,10 @@ app.post('/validarCupom', (req, res) => {
 
       if (results.length > 0) {
         // Cupom válido
-        const cupom = results[0];
-        const desconto = parseFloat(cupom.valor);
-
-        // Aplica o desconto no valor total do checkout
-        const valorFinal = valorTotal - desconto;
-
-        // Insere o valor final com desconto na tabela checkout
-        const insertQuery = `INSERT INTO checkout (valorFinal, idCliente, idEndereco, status) VALUES (?, ?, ?, ?, ?)`;
-
-        connection.query(
-          insertQuery,
-          [valorFinal, idCliente, idEndereco, 'EM PROCESSAMENTO'],
-          (insertError, insertResults, insertFields) => {
-            if (insertError) {
-              res
-                .status(500)
-                .json({ error: 'Erro ao inserir na tabela checkout' });
-              return;
-            }
-
-            res.json({ mensagem: 'Cupom válido', valorFinal });
-          }
-        );
+        res.json({ mensagem: 'Cupom válido', valor: results[0].valor });
       } else {
         // Cupom inválido
-        res.json({ mensagem: 'Cupom inválido', valorFinal: valorTotal });
+        res.json({ mensagem: 'Cupom inválido' });
       }
     }
   );
@@ -762,15 +755,17 @@ app.post('/validarCupom', (req, res) => {
 app.post('/trocarStatus', (req, res) => {
   const idCheckOut = req.body.idCheckOut;
   const novoStatus = req.body.status;
+  const obs = req.body.observacao;
+  const idProduto = req.body.idProduto;
 
   console.log('idCheckOut ' + idCheckOut);
   console.log('novoStatus ' + novoStatus);
 
   // Query to update the status in checkout table
-  const updateCheckoutQuery = `UPDATE checkout SET status = ? WHERE id = ?`;
+  const updateCheckoutQuery = `UPDATE checkout SET status = ?, observacao = ? WHERE id = ?`;
 
   // Query to update the status in checkoutProdutos table
-  const updateCheckoutProdutosQuery = `UPDATE checkoutProdutos SET status = ? WHERE idCheckOut = ?`;
+  const updateCheckoutProdutosQuery = `UPDATE checkoutProdutos SET status = ? WHERE idCheckOut = ? AND idProduto = ?`;
 
   // Query to update the status in checkoutPagamentos table
   const updateCheckoutPagamentosQuery = `UPDATE checkoutPagamentos SET status = ? WHERE idCheckOut = ?`;
@@ -784,7 +779,7 @@ app.post('/trocarStatus', (req, res) => {
 
     connection.query(
       updateCheckoutQuery,
-      [novoStatus, idCheckOut],
+      [novoStatus, obs, idCheckOut],
       (error, results) => {
         if (error) {
           connection.rollback(() => {
@@ -795,7 +790,7 @@ app.post('/trocarStatus', (req, res) => {
 
         connection.query(
           updateCheckoutProdutosQuery,
-          [novoStatus, idCheckOut],
+          [novoStatus, idCheckOut, idProduto],
           (error, results) => {
             if (error) {
               connection.rollback(() => {
@@ -829,11 +824,144 @@ app.post('/trocarStatus', (req, res) => {
                     });
                   }
 
-                  res
-                    .status(200)
-                    .json({
-                      message: 'Status updated successfully in all tables.',
+                  res.status(200).json({
+                    message: 'Status updated successfully in all tables.',
+                  });
+                });
+              }
+            );
+          }
+        );
+      }
+    );
+  });
+});
+
+// Rota para buscar todos os cupons disponíveis de um cliente
+app.get('/getCuponsDisponiveis/:id', async (req, res) => {
+  const idCliente = req.params.id;
+  const query = `SELECT * FROM cupons WHERE idCliente = ? AND dtValidade >= DATE_FORMAT(CURDATE(), '%d-%m-%Y')`;
+
+  connection.query(query, idCliente, (error, results, fields) => {
+    if (error) {
+      res.status(500).send('Erro ao buscar cupons por cliente.');
+      throw error;
+    }
+    res.json(results); // Retorna os resultados em formato JSON
+  });
+});
+
+// Rota para buscar todos os cupons expirados de um cliente
+app.get('/getCuponsExpirados/:id', async (req, res) => {
+  const idCliente = req.params.id;
+  const query = `SELECT * FROM cupons WHERE idCliente = ? AND dtValidade <= DATE_FORMAT(CURDATE(), '%d-%m-%Y')`;
+
+  connection.query(query, idCliente, (error, results, fields) => {
+    if (error) {
+      res.status(500).send('Erro ao buscar cupons por cliente.');
+      throw error;
+    }
+    res.json(results); // Retorna os resultados em formato JSON
+  });
+});
+
+// Rota da tabela checkoutProdutos por cliente
+app.get('/getCheckoutProdutosId/:id', (req, res) => {
+  const idCliente = req.params.id;
+  console.log('idCliente ' + idCliente);
+  // Query to fetch all products
+  const selectQuery = `SELECT checkoutProdutos.idProduto, checkoutProdutos.idCheckOut, checkoutProdutos.valorProduto, checkoutProdutos.status,
+                        produtos.qtd, produtos.titulo, produtos.descrProduto, produtos.dtCompra, produtos.genero, produtos.valor 
+                      FROM checkout
+                      JOIN checkoutProdutos ON checkoutProdutos.idCheckOut = checkout.id
+                      JOIN produtos ON produtos.id = checkoutProdutos.idProduto
+                      WHERE checkout.idCliente = ?`;
+
+  // Run the query
+  connection.query(selectQuery, [idCliente], (error, results) => {
+    if (error) {
+      res.status(500).send('Error fetching products');
+      throw error;
+    }
+    res.status(200).json(results);
+  });
+});
+
+// Rota para trocar o status para Solicitar Troca
+app.post('/trocaSolicitada', (req, res) => {
+  const idCheckOut = req.body.idCheckOut;
+  const novoStatus = req.body.status;
+  const idProduto = req.body.idProduto;
+
+  console.log('idCheckOut ' + idCheckOut);
+  console.log('novoStatus ' + novoStatus);
+
+  // Query to update the status in checkout table
+  const updateCheckoutQuery = `UPDATE checkout SET status = ? WHERE id = ?`;
+
+  // Query to update the status in checkoutProdutos table
+  const updateCheckoutProdutosQuery = `UPDATE checkoutProdutos SET status = ? WHERE idCheckOut = ? AND idProduto = ?`;
+
+  // Query to update the status in checkoutPagamentos table
+  const updateCheckoutPagamentosQuery = `UPDATE checkoutPagamentos SET status = ? WHERE idCheckOut = ?`;
+
+  // Run the update queries
+  connection.beginTransaction((err) => {
+    if (err) {
+      res.status(500).send('Error updating status. Transaction start failed.');
+      throw err;
+    }
+
+    connection.query(
+      updateCheckoutQuery,
+      [novoStatus, idCheckOut],
+      (error, results) => {
+        if (error) {
+          connection.rollback(() => {
+            res.status(500).send('Error updating status in checkout table.');
+            throw error;
+          });
+        }
+
+        connection.query(
+          updateCheckoutProdutosQuery,
+          [novoStatus, idCheckOut, idProduto],
+          (error, results) => {
+            if (error) {
+              connection.rollback(() => {
+                res
+                  .status(500)
+                  .send('Error updating status in checkoutProdutos table.');
+                throw error;
+              });
+            }
+
+            connection.query(
+              updateCheckoutPagamentosQuery,
+              [novoStatus, idCheckOut],
+              (error, results) => {
+                if (error) {
+                  connection.rollback(() => {
+                    res
+                      .status(500)
+                      .send(
+                        'Error updating status in checkoutPagamentos table.'
+                      );
+                    throw error;
+                  });
+                }
+
+                connection.commit((err) => {
+                  if (err) {
+                    connection.rollback(() => {
+                      res.status(500).send('Error committing transaction.');
+                      throw err;
                     });
+                  }
+
+                  res.status(200).json({
+                    message: 'Status updated successfully in all tables.',
+                  });
                 });
               }
             );

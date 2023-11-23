@@ -1,6 +1,5 @@
 <script setup>
 import { ref, onMounted, reactive } from 'vue';
-import { useRoute } from 'vue-router';
 
 const checkoutProdutosData = reactive({
   name: '',
@@ -9,17 +8,16 @@ const checkoutProdutosData = reactive({
 
 let id = '';
 let exibir = false;
-const route = useRoute();
 
 onMounted(async () => {
-  id = route.params.id;
-  console.log('Id: ' + id);
+  id = localStorage.id; // Captura o ID do Local Storage
+  console.log('id ', id);
 
-  getCheckoutProdutosDetalhe();
+  await getCheckoutProdutosId();
 });
 
-function getCheckoutProdutosDetalhe() {
-  fetch('http://localhost:3001/getCheckoutProdutosDetalhe/' + id, {
+async function getCheckoutProdutosId() {
+  fetch('http://localhost:3001/getCheckoutProdutosId/' + id, {
     method: 'GET',
   })
     .then((response) => response.json())
@@ -32,21 +30,22 @@ function getCheckoutProdutosDetalhe() {
       console.error('Erro ao enviar dados:', error);
     });
 }
-
-function trocarStatus(produto) {
-  let status = produto.status;
+function trocaSolicitada(produto) {
+  console.log('produto ' + produto);
+  let status = 'TROCA SOLICITADA';
 
   const requestBody = {
-    idCheckOut: id,
+    idCheckOut: produto.idCheckOut,
+    idCliente: id,
     idProduto: produto.idProduto,
     status: status,
-    observacao: produto.observacao,
   };
   console.log('status ' + requestBody.status);
   console.log('idCheckOut ' + requestBody.idCheckOut);
-  console.log('observacao ' + requestBody.observacao);
+  console.log('idCliente ' + requestBody.idCliente);
   console.log('idProduto ' + requestBody.idProduto);
-  fetch(`http://localhost:3001/trocarStatus`, {
+
+  fetch(`http://localhost:3001/trocaSolicitada`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -65,8 +64,7 @@ function trocarStatus(produto) {
 
 <template v-if="exibir">
   <main>
-    <h1 class="text-center">Admin</h1>
-    <h2 class="text-center">Altere o Status</h2>
+    <h2 class="text-center">Lista de Compras</h2>
     <div class="container" style="background-color: bisque">
       <div class="row">
         <div
@@ -93,39 +91,16 @@ function trocarStatus(produto) {
               <p class="card-text">
                 <strong>Gênero:</strong> {{ produto.genero }}
               </p>
-              <label for="statusSelect">Selecione o Status:</label>
-              <select v-model="produto.status">
-                <option value="EM PROCESSAMENTO">EM PROCESSAMENTO</option>
-                <option value="PEDIDO APROVADO">PEDIDO APROVADO</option>
-                <option value="PAGAMENTO RECUSADO">PAGAMENTO RECUSADO</option>
-                <option value="EM TRÂNSITO">EM TRÂNSITO</option>
-                <option value="ENTREGUE">ENTREGUE</option>
-                <option value="TROCA SOLICITADA">TROCA SOLICITADA</option>
-                <option value="TROCA APROVADA">TROCA APROVADA</option>
-                <option value="TROCA REALIZADA">TROCA REALIZADA</option>
-                <option value="TROCA RECUSADA">TROCA RECUSADA</option>
-              </select>
-            </div>
-            <div v-if="produto.status == 'TROCA RECUSADA'">
-              <label for="observacao"> Observação </label>
-
-              <input
-                type="text"
-                name="observacao"
-                v-model="produto.observacao"
-              />
-            </div>
-            <div>
-              <button type="submit">
-                <RouterLink :to="'/admin'">Cancelar</RouterLink>
-              </button>
-              <button
-                type="submit"
-                @click="trocarStatus(checkoutProdutosData.produtos[0])"
+              <a href="#" class="btn btn-secondary" style="margin-right: 2px">{{
+                produto.status
+              }}</a>
+              <a
+                href="#"
+                class="btn btn-secondary"
+                style="margin-right: 2px"
+                @click="trocaSolicitada(produto)"
+                >Solicitar Troca</a
               >
-                Salvar
-                <!--<RouterLink :to="'/admin'">Salvar</RouterLink> -->
-              </button>
             </div>
           </div>
         </div>

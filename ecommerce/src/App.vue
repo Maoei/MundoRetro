@@ -82,26 +82,32 @@ async function getUsers() {
             </li>
           </template>
           <li class="nav-item">
-            <RouterLink class="nav-link active" to="/about">About</RouterLink>
+            <RouterLink class="nav-link active" :to="'/conta/' + userData.id"
+              >Conta</RouterLink
+            >
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="#">Link</a>
+            <RouterLink class="nav-link active" to="/admin">Admin</RouterLink>
           </li>
           <li class="nav-item">
-            <RouterLink class="nav-link" to="/produtos">Produtos</RouterLink>
+            <RouterLink class="nav-link active" to="/produtos"
+              >Produtos</RouterLink
+            >
           </li>
           <li class="nav-item">
-            <RouterLink class="nav-link" to="/carrinho">Carrinho</RouterLink>
+            <RouterLink class="nav-link active" to="/carrinho"
+              >Carrinho</RouterLink
+            >
           </li>
           <li class="nav-item dropdown">
             <a
-              class="nav-link dropdown-toggle"
+              class="nav-link active dropdown-toggle"
               href="#"
               role="button"
               data-bs-toggle="dropdown"
               aria-expanded="false"
             >
-              Dropdown
+              Usuários
             </a>
             <ul class="dropdown-menu">
               <li v-for="user in userData.users">

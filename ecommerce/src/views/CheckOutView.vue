@@ -28,6 +28,9 @@ const checkoutData = reactive({
   cartoes: [{}],
   qtdCartoes: 0,
   cupom: '',
+  valorDesconto: 0,
+  valorPago: 0,
+  valorFrete: 0,
 });
 
 let id = '';
@@ -84,11 +87,13 @@ async function addCheckOut() {
   const requestBody = {
     idCliente: checkoutData.idCliente,
     valorFinal: carrinhoData.valorTotal,
+    valorDesconto: checkoutData.valorDesconto,
+    valorPago: checkoutData.valorPago,
+    valorFrete: checkoutData.valorFrete,
     idEndereco: checkoutData.idEndereco,
     pagamentos: pagamentosArray, // Pass the array of pagamentos objects
   };
   console.log('requestBody ' + requestBody.pagamentos[0].idProduto);
-  return 0;
   fetch(`http://localhost:3001/checkout/finalizar`, {
     method: 'POST',
     headers: {
@@ -120,6 +125,8 @@ async function getCarrinho() {
         console.log(item.qtd);
       });
       carrinhoData.valorTotal = Math.ceil(carrinhoData.valorTotal);
+      checkoutData.valorPago = carrinhoData.valorTotal;
+
       exibir = true;
     })
     .catch((error) => {
@@ -176,14 +183,11 @@ function removeCartao() {
 function validarCupom() {
   console.log('cupom ' + checkoutData.cupom);
   console.log('idCliente ' + checkoutData.idCliente);
-  console.log('valortotal ' + carrinhoData.valorTotal);
 
   const requestBody = {
     idCliente: checkoutData.idCliente,
     cupom: checkoutData.cupom,
-    valorTotal: carrinhoData.valorTotal,
   };
-  return 0;
   console.log('cupom ' + requestBody.cupom);
   console.log('idCliente ' + requestBody.idCliente);
 
@@ -196,11 +200,17 @@ function validarCupom() {
   })
     .then((response) => response.json())
     .then((data) => {
+      checkoutData.valorPago = carrinhoData.valorTotal - Number(data.valor);
+
       console.log('Resposta do backend:', data);
     })
     .catch((error) => {
       console.error('Erro ao enviar dados:', error);
     });
+}
+function calcularFrete() {
+  console.log('Funciona');
+  checkoutData.valorFrete = Math.floor(Math.random() * 100);
 }
 </script>
 
@@ -223,12 +233,25 @@ function validarCupom() {
       </ul>
     </div>
     <div>
-      <h3>Valor Total</h3>
-      <h2>{{ carrinhoData.valorTotal }}</h2>
+      <h3>Valor dos Produtos</h3>
+      <h2>{{ checkoutData.valorPago }}</h2>
+    </div>
+    <div>
+      <h3>Valor do Frete</h3>
+      <h2>{{ checkoutData.valorFrete }}</h2>
+    </div>
+    <div>
+      <h3>Total a Pagar</h3>
+      <h2>{{ Math.ceil(checkoutData.valorPago + checkoutData.valorFrete) }}</h2>
     </div>
     <div>
       <h1>Selecione o Endereço</h1>
-      <select name="" id="cartao" v-model="checkoutData.idEndereco">
+      <select
+        name=""
+        id="cartao"
+        v-model="checkoutData.idEndereco"
+        v-on:change="calcularFrete()"
+      >
         <option v-for="endereco in enderecoData.enderecos" :value="endereco.id">
           {{ endereco.endereco }}
         </option>
@@ -247,7 +270,7 @@ function validarCupom() {
         type="number"
         v-model="checkoutData.cartoes[0].valor"
         min="0"
-        :max="carrinhoData.valorTotal"
+        :max="carrinhoData.valorTotal + checkoutData.valorFrete"
       />
       <div>
         <button v-on:click="addCartao()">Adicionar Cartão</button>
@@ -259,7 +282,7 @@ function validarCupom() {
           :name="'cartao_' + val"
           :id="'cartao_' + val"
           v-model="checkoutData.cartoes[val].id"
-          :max="carrinhoData.valorTotal"
+          :max="carrinhoData.valorTotal + checkoutData.valorFrete"
           :min="0"
         >
           <option v-for="cartao in cartoesData.cartoes" :value="cartao">
