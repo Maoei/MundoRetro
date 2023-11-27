@@ -757,6 +757,8 @@ app.post('/trocarStatus', (req, res) => {
   const novoStatus = req.body.status;
   const obs = req.body.observacao;
   const idProduto = req.body.idProduto;
+  const valorCupom = req.body.valorCupom;
+  const idCliente = req.body.idCliente;
 
   console.log('idCheckOut ' + idCheckOut);
   console.log('novoStatus ' + novoStatus);
@@ -769,6 +771,29 @@ app.post('/trocarStatus', (req, res) => {
 
   // Query to update the status in checkoutPagamentos table
   const updateCheckoutPagamentosQuery = `UPDATE checkoutPagamentos SET status = ? WHERE idCheckOut = ?`;
+
+  // Query to insert a new cupon in the cupons table
+  const insertCuponsQuery = `INSERT INTO cupons (codigoCupon, tipoCupom, descrCupom, dtValidade, valor, idCliente) VALUES (?, ?, ?, ?, ?, ?)`;
+
+  // Function to generate a random coupon
+  const createCupom = () => {
+    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'; // Define the characters allowed in the coupon
+    let cupom = '';
+    for (let i = 0; i < 5; i++) {
+      const randomIndex = Math.floor(Math.random() * characters.length);
+      cupom += characters.charAt(randomIndex);
+    }
+    return `CUPOM${cupom}`;
+  };
+
+  // Function to get the current date and add 7 days
+  const calculateExpirationDate = () => {
+    const currentDate = new Date();
+    const expirationDate = new Date(
+      currentDate.getTime() + 7 * 24 * 60 * 60 * 1000
+    ); // Add 7 days
+    return expirationDate.toISOString().split('T')[0]; // Format as YYYY-MM-DD
+  };
 
   // Run the update queries
   connection.beginTransaction((err) => {
@@ -816,18 +841,65 @@ app.post('/trocarStatus', (req, res) => {
                   });
                 }
 
-                connection.commit((err) => {
-                  if (err) {
-                    connection.rollback(() => {
-                      res.status(500).send('Error committing transaction.');
-                      throw err;
-                    });
-                  }
+                // Check if the status is "TROCA APROVADA"
+                if (novoStatus === 'TROCA APROVADA') {
+                  const cupom = createCupom(); // Generate a random coupon
+                  const expirationDate = calculateExpirationDate(); // Calculate expiration date
 
-                  res.status(200).json({
-                    message: 'Status updated successfully in all tables.',
+                  connection.query(
+                    insertCuponsQuery,
+                    [
+                      cupom,
+                      'Troca',
+                      'Cupom de Troca',
+                      expirationDate,
+                      valorCupom,
+                      idCliente,
+                    ],
+                    (error, results) => {
+                      if (error) {
+                        connection.rollback(() => {
+                          res
+                            .status(500)
+                            .send('Error inserting cupon in cupons table.');
+                          throw error;
+                        });
+                      }
+
+                      connection.commit((err) => {
+                        if (err) {
+                          connection.rollback(() => {
+                            res
+                              .status(500)
+                              .send('Error committing transaction.');
+                            throw err;
+                          });
+                        }
+
+                        res.status(200).json({
+                          message:
+                            'Status updated successfully in all tables. Cupon inserted.',
+                          cupom: cupom,
+                        });
+                      });
+                    }
+                  );
+                } else {
+                  // If status is not "TROCA APROVADA", commit the transaction without generating a cupon
+                  connection.commit((err) => {
+                    if (err) {
+                      connection.rollback(() => {
+                        res.status(500).send('Error committing transaction.');
+                        throw err;
+                      });
+                    }
+
+                    res.status(200).json({
+                      message:
+                        'Status updated successfully in all tables. No cupon inserted.',
+                    });
                   });
-                });
+                }
               }
             );
           }

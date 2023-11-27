@@ -35,7 +35,11 @@ async function getProdutos() {
       <div class="row">
         <div class="col" v-for="produto in produtoData.produtos">
           <div class="card" style="width: 18rem">
-            <img src="..." class="card-img-top" alt="..." />
+            <img
+              :src="'../src/assets/images/' + produto.id + '.png'"
+              class="card-img-top image-fluid"
+              alt="..."
+            />
             <div class="card-body">
               <h5 class="card-title">
                 <RouterLink :to="'/produtos/detalhe/' + produto.id">{{
@@ -81,6 +85,9 @@ async function getProdutos() {
             </div>
           </div>
         </div>
+      </div>
+      <div class="row">
+        <h1>Teste</h1>
       </div>
     </div>
   </main>

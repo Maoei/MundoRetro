@@ -38,14 +38,19 @@ function trocarStatus(produto) {
 
   const requestBody = {
     idCheckOut: id,
+    idCliente: localStorage.id,
     idProduto: produto.idProduto,
     status: status,
     observacao: produto.observacao,
+    valorCupom: produto.valorProduto,
   };
   console.log('status ' + requestBody.status);
   console.log('idCheckOut ' + requestBody.idCheckOut);
   console.log('observacao ' + requestBody.observacao);
   console.log('idProduto ' + requestBody.idProduto);
+  console.log('valorCupom ' + requestBody.valorCupom);
+  console.log('idCliente ' + requestBody.idCliente);
+
   fetch(`http://localhost:3001/trocarStatus`, {
     method: 'POST',
     headers: {
@@ -65,9 +70,14 @@ function trocarStatus(produto) {
 
 <template v-if="exibir">
   <main>
-    <h1 class="text-center">Admin</h1>
-    <h2 class="text-center">Altere o Status</h2>
-    <div class="container" style="background-color: bisque">
+    <div class="container">
+      <div class="row">
+        <div class="col">
+          <h1 class="text-center">Admin</h1>
+          <h2 class="text-center">Altere o Status</h2>
+        </div>
+      </div>
+
       <div class="row">
         <div
           class="col"
@@ -75,7 +85,11 @@ function trocarStatus(produto) {
           :key="produto.idCheckOut"
         >
           <div class="card" style="width: 18rem">
-            <img src="..." class="card-img-top" alt="..." />
+            <img
+              :src="'../../src/assets/images/' + produto.idProduto + '.png'"
+              class="card-img-top"
+              alt="..."
+            />
             <div class="card-body">
               <h5 class="card-title">
                 {{ produto.titulo }}
@@ -105,27 +119,35 @@ function trocarStatus(produto) {
                 <option value="TROCA REALIZADA">TROCA REALIZADA</option>
                 <option value="TROCA RECUSADA">TROCA RECUSADA</option>
               </select>
-            </div>
-            <div v-if="produto.status == 'TROCA RECUSADA'">
-              <label for="observacao"> Observação </label>
-
-              <input
-                type="text"
-                name="observacao"
-                v-model="produto.observacao"
-              />
-            </div>
-            <div>
-              <button type="submit">
-                <RouterLink :to="'/admin'">Cancelar</RouterLink>
-              </button>
-              <button
-                type="submit"
-                @click="trocarStatus(checkoutProdutosData.produtos[0])"
-              >
-                Salvar
-                <!--<RouterLink :to="'/admin'">Salvar</RouterLink> -->
-              </button>
+              <div class="row">
+                <div class="col">
+                  <div v-if="produto.status == 'TROCA RECUSADA'">
+                    <label for="observacao"> Motivo da Recusa: </label>
+                    <textarea
+                      name="observacao"
+                      v-bind:style="{ height: '200px', width: '250px' }"
+                      v-model="produto.observacao"
+                      placeholder="Informe o motivo da recusa..."
+                    >
+                    </textarea>
+                  </div>
+                  <div class="row mt-2">
+                    <div class="col">
+                      <button class="btn btn-secondary" type="submit">
+                        <RouterLink :to="'/admin'">Cancelar</RouterLink>
+                      </button>
+                      <button
+                        class="btn btn-secondary"
+                        type="submit"
+                        @click="trocarStatus(checkoutProdutosData.produtos[0])"
+                      >
+                        Salvar
+                        <!--<RouterLink :to="'/admin'">Salvar</RouterLink> -->
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>

@@ -1,5 +1,6 @@
 <script setup>
 import { ref, onMounted, reactive } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 
 const carrinhoData = reactive({
   name: '',
@@ -35,6 +36,7 @@ const checkoutData = reactive({
 
 let id = '';
 let exibir = false;
+const router = useRouter();
 
 onMounted(async () => {
   id = localStorage.id; // Captura o ID do Local Storage
@@ -104,6 +106,7 @@ async function addCheckOut() {
     .then((response) => response.json())
     .then((data) => {
       console.log('Resposta do backend:', data);
+      router.push('/');
     })
     .catch((error) => {
       console.error('Erro ao enviar dados:', error);
@@ -216,93 +219,183 @@ function calcularFrete() {
 
 <template v-if="exibir">
   <main>
-    <h1>CheckOut</h1>
-    <div class="card-body">
-      <ul>
-        <li v-for="produto in carrinhoData.produtos" :key="produto.id">
-          <h2>{{ produto.titulo }}</h2>
-          <input
-            type="number"
-            min="1"
-            :max="produto.produto_qtd"
-            v-model="produto.qtd"
-            readonly
-            v-on:change="addCarrinho(produto.produto_id, produto.qtd)"
-          />
-        </li>
-      </ul>
+    <div class="container text-center">
+      <div class="row">
+        <h1>CheckOut</h1>
+      </div>
+      <div class="container">
+        <div class="row">
+          <div class="col">
+            <h3>Valor dos Produtos</h3>
+            <a href="#" class="btn btn-secondary" style="margin-right: 2px"
+              >R$ {{ checkoutData.valorPago }}</a
+            >
+          </div>
+
+          <div class="col">
+            <h3>Valor do Frete</h3>
+            <a href="#" class="btn btn-secondary" style="margin-right: 2px"
+              >R$ {{ checkoutData.valorFrete }}</a
+            >
+          </div>
+          <div class="col">
+            <h3>Total a Pagar</h3>
+            <a href="#" class="btn btn-secondary" style="margin-right: 2px"
+              >R$
+              {{
+                Math.ceil(checkoutData.valorPago + checkoutData.valorFrete)
+              }}</a
+            >
+          </div>
+        </div>
+      </div>
+      <div class="row mt-2">
+        <div class="col">
+          <form>
+            <div class="card-body">
+              <div
+                class="col"
+                v-for="produto in carrinhoData.produtos"
+                :key="produto.id"
+              >
+                <div class="card mb-3" style="max-width: 540px">
+                  <div class="row g-0">
+                    <div class="col-md-4">
+                      <img
+                        :src="
+                          '../src/assets/images/' + produto.produto_id + '.png'
+                        "
+                        class="img-fluid rounded-start"
+                        alt="..."
+                      />
+                    </div>
+                    <div class="col-md-8">
+                      <div class="card-body">
+                        <h5 class="card-title">{{ produto.titulo }}</h5>
+                        <p class="card-text">
+                          This is a wider card with supporting text below as a
+                          natural lead-in to additional content. This content is
+                          a little bit longer.
+                        </p>
+                        <p class="card-text">
+                          <input
+                            type="number"
+                            min="1"
+                            :max="produto.produto_qtd"
+                            v-model="produto.qtd"
+                            v-on:change="
+                              addCarrinho(produto.produto_id, produto.qtd)
+                            "
+                          />
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
     </div>
-    <div>
-      <h3>Valor dos Produtos</h3>
-      <h2>{{ checkoutData.valorPago }}</h2>
-    </div>
-    <div>
-      <h3>Valor do Frete</h3>
-      <h2>{{ checkoutData.valorFrete }}</h2>
-    </div>
-    <div>
-      <h3>Total a Pagar</h3>
-      <h2>{{ Math.ceil(checkoutData.valorPago + checkoutData.valorFrete) }}</h2>
-    </div>
-    <div>
+
+    <div class="row">
       <h1>Selecione o Endereço</h1>
-      <select
-        name=""
-        id="cartao"
-        v-model="checkoutData.idEndereco"
-        v-on:change="calcularFrete()"
-      >
-        <option v-for="endereco in enderecoData.enderecos" :value="endereco.id">
-          {{ endereco.endereco }}
-        </option>
-      </select>
-    </div>
-    <div>
-      <h1>Selecione o Método de Pagamento</h1>
-      <h2>Escolha o Cartão</h2>
-      <select name="" id="cartao_0" v-model="checkoutData.cartoes[0].id">
-        <option v-for="cartao in cartoesData.cartoes" :value="cartao">
-          {{ cartao.numeroCartao }}
-        </option>
-      </select>
-      <h2>Valor a Pagar no Cartão</h2>
-      <input
-        type="number"
-        v-model="checkoutData.cartoes[0].valor"
-        min="0"
-        :max="carrinhoData.valorTotal + checkoutData.valorFrete"
-      />
-      <div>
-        <button v-on:click="addCartao()">Adicionar Cartão</button>
-        <button v-on:click="removeCartao()">Remover Cartão</button>
+      <div class="row">
+        <div class="col">
+          <select
+            name=""
+            id="cartao"
+            v-model="checkoutData.idEndereco"
+            v-on:change="calcularFrete()"
+          >
+            <option
+              v-for="endereco in enderecoData.enderecos"
+              :value="endereco.id"
+            >
+              {{ endereco.endereco }}
+            </option>
+          </select>
+        </div>
       </div>
-      <div v-for="(val, index) in checkoutData.qtdCartoes">
-        <h2>Escolha o Cartão</h2>
-        <select
-          :name="'cartao_' + val"
-          :id="'cartao_' + val"
-          v-model="checkoutData.cartoes[val].id"
-          :max="carrinhoData.valorTotal + checkoutData.valorFrete"
-          :min="0"
-        >
-          <option v-for="cartao in cartoesData.cartoes" :value="cartao">
-            {{ cartao.numeroCartao }}
-          </option>
-        </select>
-        <h2>Valor a Pagar no Cartão</h2>
-        <input
-          type="number"
-          v-model="checkoutData.cartoes[val].valor"
-          :min="0"
-          :max="carrinhoData.valorTotal - checkoutData.cartoes[0].valor"
-        />
+      <div class="row">
+        <h1>Selecione o Método de Pagamento</h1>
+        <div class="row">
+          <h2>Escolha o Cartão</h2>
+        </div>
+        <div class="row">
+          <div class="col">
+            <select name="" id="cartao_0" v-model="checkoutData.cartoes[0].id">
+              <option v-for="cartao in cartoesData.cartoes" :value="cartao">
+                {{ cartao.numeroCartao }}
+              </option>
+            </select>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col">
+            <h2>Valor a Pagar no Cartão</h2>
+            <input
+              type="number"
+              v-model="checkoutData.cartoes[0].valor"
+              min="10"
+              :max="carrinhoData.valorTotal + checkoutData.valorFrete"
+            />
+          </div>
+        </div>
+
+        <div class="row mt-2">
+          <div class="col">
+            <button class="btn btn-secondary" v-on:click="addCartao()">
+              Adicionar Cartão
+            </button>
+            <button class="btn btn-secondary" v-on:click="removeCartao()">
+              Remover Cartão
+            </button>
+          </div>
+        </div>
+
+        <div class="row mt-2" v-for="(val, index) in checkoutData.qtdCartoes">
+          <div class="col">
+            <h2>Escolha o Cartão</h2>
+            <select
+              :name="'cartao_' + val"
+              :id="'cartao_' + val"
+              v-model="checkoutData.cartoes[val].id"
+              :max="carrinhoData.valorTotal + checkoutData.valorFrete"
+              :min="0"
+            >
+              <option v-for="cartao in cartoesData.cartoes" :value="cartao">
+                {{ cartao.numeroCartao }}
+              </option>
+            </select>
+            <h2>Valor a Pagar no Cartão</h2>
+            <input
+              type="number"
+              v-model="checkoutData.cartoes[val].valor"
+              min="10"
+              :max="carrinhoData.valorTotal - checkoutData.cartoes[0].valor"
+            />
+          </div>
+        </div>
       </div>
     </div>
-    <div>
-      <input type="text" v-model="checkoutData.cupom" /> Insira o código do
-      cupom
-      <button v-on:click="validarCupom()">Validar Cupom</button>
+
+    <div class="row">
+      <div class="col">
+        <input type="text" v-model="checkoutData.cupom" /> Insira o código do
+        cupom
+        <button class="btn btn-secondary" v-on:click="validarCupom()">
+          Validar Cupom
+        </button>
+      </div>
     </div>
-    <button v-on:click="addCheckOut()">Finalizar</button>
+    <div class="row">
+      <div class="col">
+        <button class="btn btn-secondary" v-on:click="addCheckOut()">
+          Finalizar
+        </button>
+      </div>
+    </div>
   </main>
 </template>

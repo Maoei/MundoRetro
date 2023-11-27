@@ -73,6 +73,10 @@ CREATE TABLE checkout (
     status VARCHAR(20) NOT NULL,
 	FOREIGN KEY (idEndereco) REFERENCES enderecos(id),
     FOREIGN KEY (idCliente) REFERENCES clientes(id)
+    ALTER TABLE checkout ADD COLUMN valorPago DECIMAL(10, 2)
+    ALTER TABLE checkout ADD COLUMN valorDesconto DECIMAL(10, 2)
+    ALTER TABLE checkout ADD COLUMN valorFrete DECIMAL(10, 2)
+    ALTER TABLE checkout ADD COLUMN observacao VARCHAR(300)
 );
 
 CREATE TABLE checkoutPagamentos (
@@ -99,6 +103,7 @@ CREATE TABLE checkoutProdutos (
     status VARCHAR(20) NOT NULL,
 	FOREIGN KEY (idProduto) REFERENCES produtos(id),
 	FOREIGN KEY (idCheckOut) REFERENCES checkout(id) 
+    ALTER TABLE checkoutProdutos ADD COLUMN qtd INT
 );
 
 --INSERT

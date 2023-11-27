@@ -34,9 +34,14 @@ async function getCheckoutProdutos() {
 
 <template v-if="exibir">
   <main>
-    <h1 class="text-center">Admin</h1>
-    <h2 class="text-center">Lista de Vendas</h2>
-    <div class="container" style="background-color: bisque">
+    <div class="container">
+      <div class="row">
+        <div class="col">
+          <h1 class="text-center">Admin</h1>
+          <h2 class="text-center">Lista de Vendas</h2>
+        </div>
+      </div>
+
       <div class="row">
         <div
           class="col"
@@ -44,7 +49,11 @@ async function getCheckoutProdutos() {
           :key="produto.idCheckOut"
         >
           <div class="card" style="width: 18rem">
-            <img src="..." class="card-img-top" alt="..." />
+            <img
+              :src="'../../src/assets/images/' + produto.idProduto + '.png'"
+              class="card-img-top"
+              alt="..."
+            />
             <div class="card-body">
               <h5 class="card-title">
                 <RouterLink :to="'/admin/produto/' + produto.idCheckOut">{{

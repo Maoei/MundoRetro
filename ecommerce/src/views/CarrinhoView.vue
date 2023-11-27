@@ -1,5 +1,6 @@
 <script setup>
 import { ref, onMounted, reactive } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 
 const carrinhoData = reactive({
   name: '',
@@ -9,6 +10,7 @@ const carrinhoData = reactive({
 
 let id = '';
 let exibir = false;
+const router = useRouter();
 
 onMounted(async () => {
   id = localStorage.id; // Captura o ID do Local Storage
@@ -77,28 +79,65 @@ async function addCarrinho(id, qtd) {
       console.error('Erro ao enviar dados:', error);
     });
 }
+
+function redirect() {
+  router.push('/checkout');
+}
 </script>
 
 <template v-if="exibir">
   <main>
-    <h1>Carrinho</h1>
-    <div class="card-body">
-      <ul>
-        <li v-for="produto in carrinhoData.produtos" :key="produto.id">
-          <h2>{{ produto.titulo }}</h2>
-          <input
-            type="number"
-            min="1"
-            :max="produto.produto_qtd"
-            v-model="produto.qtd"
-            v-on:change="addCarrinho(produto.produto_id, produto.qtd)"
-          />
-          <button v-on:click="deleteUmCarrinho(produto.id)">Excluir</button>
-        </li>
-      </ul>
+    <div class="container text-center">
+      <div class="row">
+        <h1>Carrinho</h1>
+      </div>
+      <div class="row justify-content-md-center">
+        <div class="col">
+          <form>
+            <div class="card-body">
+              <div
+                class="col"
+                v-for="produto in carrinhoData.produtos"
+                :key="produto.id"
+              >
+                <div class="card" style="width: 18rem">
+                  <img
+                    :src="'../src/assets/images/' + produto.produto_id + '.png'"
+                    class="card-img-top image-fluid"
+                    alt="..."
+                  />
+                  <div class="card-body">
+                    <h5 class="card-title">{{ produto.titulo }}</h5>
+                    <a
+                      href="#"
+                      class="btn btn-secondary"
+                      style="margin-right: 2px"
+                      >R$ {{ produto.valor }}</a
+                    >
+                    <input
+                      type="number"
+                      min="1"
+                      :max="produto.produto_qtd"
+                      v-model="produto.qtd"
+                      v-on:change="addCarrinho(produto.produto_id, produto.qtd)"
+                    />
+                    <button v-on:click="deleteUmCarrinho(produto.id)">
+                      Excluir
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+      <div class="row justify-content-md-center">
+        <div class="col">
+          <button class="btn btn-secondary" v-on:click="redirect()">
+            Ir para o pagamento
+          </button>
+        </div>
+      </div>
     </div>
-    <button>
-      <RouterLink :to="'/checkout'">Mandar para CheckOut</RouterLink>
-    </button>
   </main>
 </template>

@@ -31,12 +31,20 @@ async function getProdutos() {
 
 <template v-if="exibir">
   <main>
-    <h1 class="text-center">Produtos</h1>
-    <div class="container" style="background-color: bisque">
+    <div class="container">
       <div class="row">
+        <div class="col">
+          <h1 class="text-center">Produtos</h1>
+        </div>
+      </div>
+      <div class="row mt-2">
         <div class="col" v-for="produto in produtoData.produtos">
           <div class="card" style="width: 18rem">
-            <img src="..." class="card-img-top" alt="..." />
+            <img
+              :src="'../../src/assets/images/' + produto.id + '.png'"
+              class="card-img-top"
+              alt="..."
+            />
             <div class="card-body">
               <h5 class="card-title">
                 <RouterLink :to="'/produtos/detalhe/' + produto.id">{{

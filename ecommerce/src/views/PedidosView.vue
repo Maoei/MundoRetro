@@ -94,13 +94,15 @@ function trocaSolicitada(produto) {
               <a href="#" class="btn btn-secondary" style="margin-right: 2px">{{
                 produto.status
               }}</a>
-              <a
-                href="#"
-                class="btn btn-secondary"
-                style="margin-right: 2px"
-                @click="trocaSolicitada(produto)"
-                >Solicitar Troca</a
-              >
+              <div v-if="produto.status == 'PEDIDO ENTREGUE'">
+                <a
+                  href="#"
+                  class="btn btn-secondary"
+                  style="margin-right: 2px"
+                  @click="trocaSolicitada(produto)"
+                  >Solicitar Troca</a
+                >
+              </div>
             </div>
           </div>
         </div>

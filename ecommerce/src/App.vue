@@ -148,7 +148,7 @@ async function getUsers() {
 
   <RouterView />
 
-  <div class="fixed-bottom bg-dark" data-bs-theme="dark">
+  <div class="bg-dark" data-bs-theme="dark">
     <footer class="py-3 my-4">
       <ul class="nav justify-content-center border-bottom pb-3 mb-3">
         <li class="nav-item">

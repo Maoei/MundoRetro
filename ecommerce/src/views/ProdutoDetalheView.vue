@@ -1,6 +1,6 @@
 <script setup>
 import { ref, onMounted, reactive } from 'vue';
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 
 const produtoData = reactive({
   name: '',
@@ -11,6 +11,7 @@ const produtoData = reactive({
 let id = '';
 let exibir = false;
 const route = useRoute();
+const router = useRouter();
 
 onMounted(async () => {
   console.log(route.params.id);
@@ -49,6 +50,7 @@ async function addCarrinho(id) {
     .then((data) => {
       console.log('Resposta do backend:', data);
       getProduto();
+      router.push('/carrinho');
     })
     .catch((error) => {
       console.error('Erro ao enviar dados:', error);
@@ -60,19 +62,46 @@ async function addCarrinho(id) {
 
 <template>
   <main>
-    <h>{{ produtoData.produtos.titulo }}</h>
-    <div class="card-body">
-      <li>
-        <button v-on:click="addCarrinho(produtoData.produtos.id)">
-          Comprar
-        </button>
-        <input
-          type="number"
-          :max="produtoData.produtos.qtd"
-          v-model="produtoData.data.qtd"
-        />
-        Qtd
-      </li>
+    <div class="container text-center">
+      <div class="col-md-12">
+        <h1>{{ produtoData.produtos.titulo }}</h1>
+      </div>
+      <div class="row justify-content-md-center">
+        <div class="col">
+          <div class="card-body">
+            <img
+              :src="
+                '../../src/assets/images/' + produtoData.produtos.id + '.png'
+              "
+              alt="..."
+              width="240"
+              height="240"
+            />
+          </div>
+        </div>
+      </div>
+      <div class="row justify-content-md-center">
+        <div class="col">
+          <form>
+            <div class="mb-3 offset-md-4 col-md-4">
+              <input
+                class="form-control"
+                type="number"
+                min="1"
+                :max="produtoData.produtos.qtd"
+                v-model="produtoData.data.qtd"
+              />
+              Qtd
+            </div>
+          </form>
+          <button
+            class="btn btn-primary"
+            v-on:click="addCarrinho(produtoData.produtos.id)"
+          >
+            Comprar
+          </button>
+        </div>
+      </div>
     </div>
   </main>
 </template>
