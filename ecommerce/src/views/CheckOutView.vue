@@ -203,7 +203,14 @@ function validarCupom() {
   })
     .then((response) => response.json())
     .then((data) => {
-      checkoutData.valorPago = carrinhoData.valorTotal - Number(data.valor);
+      console.log('data.valor ' + data.valor);
+      console.log('valorPago ' + checkoutData.valorPago);
+      console.log(
+        'checkoutData.valorPago ' + checkoutData.valorPago - Number(data.valor)
+      );
+      if (data.valor > 0) {
+        checkoutData.valorPago = checkoutData.valorPago - Number(data.valor);
+      }
 
       console.log('Resposta do backend:', data);
     })
@@ -213,7 +220,10 @@ function validarCupom() {
 }
 function calcularFrete() {
   console.log('Funciona');
-  checkoutData.valorFrete = Math.floor(Math.random() * 100);
+  checkoutData.valorFrete = Math.floor(Math.random() * 50);
+}
+function converterParaMaiusculas() {
+  checkoutData.cupom = checkoutData.cupom.toUpperCase();
 }
 </script>
 
@@ -273,9 +283,7 @@ function calcularFrete() {
                       <div class="card-body">
                         <h5 class="card-title">{{ produto.titulo }}</h5>
                         <p class="card-text">
-                          This is a wider card with supporting text below as a
-                          natural lead-in to additional content. This content is
-                          a little bit longer.
+                          {{ produto.descrProduto }}
                         </p>
                         <p class="card-text">
                           <input
@@ -317,6 +325,15 @@ function calcularFrete() {
             </option>
           </select>
         </div>
+        <div class="row mt-2">
+          <div class="col">
+            <RouterLink
+              class="btn btn-secondary"
+              :to="'/enderecos/cadastro/' + id"
+              >Cadastrar Novo Endereço</RouterLink
+            >
+          </div>
+        </div>
       </div>
       <div class="row">
         <h1>Selecione o Método de Pagamento</h1>
@@ -355,6 +372,16 @@ function calcularFrete() {
           </div>
         </div>
 
+        <div class="row mt-2">
+          <div class="col">
+            <RouterLink
+              class="btn btn-secondary"
+              :to="'/cartoes/cadastro/' + id"
+              >Cadastrar Novo Cartão</RouterLink
+            >
+          </div>
+        </div>
+
         <div class="row mt-2" v-for="(val, index) in checkoutData.qtdCartoes">
           <div class="col">
             <h2>Escolha o Cartão</h2>
@@ -381,16 +408,20 @@ function calcularFrete() {
       </div>
     </div>
 
-    <div class="row">
+    <div class="row mt-2">
       <div class="col">
-        <input type="text" v-model="checkoutData.cupom" /> Insira o código do
-        cupom
+        <input
+          type="text"
+          v-model="checkoutData.cupom"
+          @input="converterParaMaiusculas"
+          placeholder="Insira o código do cupom"
+        />
         <button class="btn btn-secondary" v-on:click="validarCupom()">
           Validar Cupom
         </button>
       </div>
     </div>
-    <div class="row">
+    <div class="row mt-2">
       <div class="col">
         <button class="btn btn-secondary" v-on:click="addCheckOut()">
           Finalizar

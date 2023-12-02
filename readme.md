@@ -40,3 +40,21 @@ O cliente pode verificar o status atualizado do seu pedido a qualquer momento.
 No caso da troca recusada, o administrador deve informar o motivo da recusa.
 
 Parte do ADMIN por enquanto deve focar mais em trocar as situações do pedido.
+
+Fazer tela com gráfico.
+
+Adicionar botão para cadastro de cartão e endereço no checkout.
+
+Ajustar para ter várias linhas o gráfico e adicionar o filtro por data de compra.
+
+Adicionar um filtro na tela de pedidos e de admin.
+
+Ajustar tamanho do gráfico na tela.
+
+Revisar documentação e ppt.
+
+TESTES AUTOMATIZADOS.
+
+Deverá ser apresentado em sala de aula, o caso de uso de análise implementado. É esperado um gráfico de linhas que contenha as vendas de produtos ou categorias de produtos, onde cada linha representa um destes dois elementos. O usuário poderá definir uma data de início e uma data de fim e o gráfico no eixo x deverá ter o período selecionado pelo usuário e no eixo y o volume financeiro.
+
+Cada linha deverá representar um produto ou uma categoria diferente.

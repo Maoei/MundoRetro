@@ -342,7 +342,7 @@ app.get('/getCarrinho/:id', (req, res) => {
   const clienteId = req.params.id;
 
   const query = `
-    SELECT carrinho.*, produtos.qtd as produto_qtd, titulo, produtos.valor
+    SELECT carrinho.*, produtos.qtd as produto_qtd, titulo, produtos.valor, produtos.descrProduto
     FROM carrinho
     JOIN produtos ON carrinho.produto_id = produtos.id
     WHERE carrinho.cliente_id = ?
@@ -1041,6 +1041,30 @@ app.post('/trocaSolicitada', (req, res) => {
         );
       }
     );
+  });
+});
+
+// Rota para buscar dados do gráfico
+app.get('/getGrafico', (req, res) => {
+  console.log(req.body);
+
+  const selectQuery = `
+  SELECT checkoutPagamentos.idProduto, checkoutPagamentos.valorProduto, checkoutPagamentos.dtCompra
+  FROM checkout
+  JOIN checkoutPagamentos ON checkout.id = checkoutPagamentos.idCheckout
+  WHERE checkoutPagamentos.dtCompra BETWEEN ${} AND ${}
+  GROUP BY checkoutPagamentos.idProduto, checkoutPagamentos.dtCompra, checkoutPagamentos.valorProduto
+  ORDER BY checkoutPagamentos.dtCompra
+`;
+
+  // Run the query
+  connection.query(selectQuery, (error, results) => {
+    if (error) {
+      console.error('Erro ao buscar dados para o gráfico:', error);
+      res.status(500).send('Erro interno do servidor');
+      throw error;
+    }
+    res.status(200).json(results);
   });
 });
 

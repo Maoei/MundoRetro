@@ -104,6 +104,12 @@ const router = createRouter({
       component: () => import('../views/PedidosView.vue'),
       props: true,
     },
+    {
+      path: '/grafico',
+      name: 'grafico',
+      component: () => import('../views/ChartView.vue'),
+      props: true,
+    },
   ],
 });
 

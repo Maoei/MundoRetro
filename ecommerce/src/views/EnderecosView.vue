@@ -34,28 +34,45 @@ async function getEnderecos() {
 
 <template v-if="exibir">
   <main>
-    <h>Lista de Endereços</h>
-    <div class="card-body">
-      <li v-for="endereco in enderecoData.enderecos">
-        {{
-          endereco.cep +
-          ', ' +
-          endereco.endereco +
-          ', ' +
-          endereco.numero +
-          ', ' +
-          endereco.complemento +
-          ', ' +
-          endereco.bairro +
-          ' - ' +
-          endereco.cidade +
-          ', ' +
-          endereco.estado
-        }}
-      </li>
-      <RouterLink class="btn btn-primary" :to="'/enderecos/cadastro/' + id"
-        >Cadastrar Novo Endereço</RouterLink
-      >
+    <div class="container">
+      <div class="row">
+        <div class="col">
+          <h1>Lista de Endereços</h1>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col">
+          <div class="card" v-for="endereco in enderecoData.enderecos">
+            <div class="card-body" style="white-space: pre-line">
+              {{
+                endereco.cep +
+                ', ' +
+                endereco.endereco +
+                ', ' +
+                endereco.numero +
+                ', ' +
+                endereco.complemento +
+                ', ' +
+                endereco.bairro +
+                ' - ' +
+                endereco.cidade +
+                ', ' +
+                endereco.estado
+              }}
+            </div>
+          </div>
+          <div class="row">
+            <div class="col">
+              <RouterLink
+                class="btn btn-primary"
+                :to="'/enderecos/cadastro/' + id"
+                >Cadastrar Novo Endereço</RouterLink
+              >
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </main>
 </template>

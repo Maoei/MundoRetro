@@ -34,14 +34,37 @@ async function getCartoes() {
 
 <template v-if="exibir">
   <main>
-    <h>Lista de Cartões</h>
-    <div class="card-body">
-      <li v-for="cartao in cartoesData.cartoes">
-        {{ cartao.nomeCartao + '\n ' + cartao.numeroCartao }}
-      </li>
-      <RouterLink class="btn btn-primary" :to="'/cartoes/cadastro/' + id"
-        >Cadastrar Novo Cartão</RouterLink
-      >
+    <div class="container">
+      <div class="row">
+        <div class="col">
+          <h1>Lista de Cartões</h1>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col">
+          <div class="card" v-for="cartao in cartoesData.cartoes">
+            <div class="card-body" style="white-space: pre-line">
+              {{
+                'Nome do titular: ' +
+                cartao.nomeCartao +
+                '\n' +
+                `Número do Cartão: ` +
+                cartao.numeroCartao
+              }}
+            </div>
+          </div>
+          <div class="row">
+            <div class="col">
+              <RouterLink
+                class="btn btn-secondary"
+                :to="'/cartoes/cadastro/' + id"
+                >Cadastrar Novo Cartão</RouterLink
+              >
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </main>
 </template>

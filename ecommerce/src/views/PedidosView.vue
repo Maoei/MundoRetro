@@ -94,7 +94,7 @@ function trocaSolicitada(produto) {
               <a href="#" class="btn btn-secondary" style="margin-right: 2px">{{
                 produto.status
               }}</a>
-              <div v-if="produto.status == 'PEDIDO ENTREGUE'">
+              <div v-if="produto.status == 'ENTREGUE'">
                 <a
                   href="#"
                   class="btn btn-secondary"
