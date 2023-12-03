@@ -40,6 +40,23 @@ async function getUsers() {
       console.error('Erro ao enviar dados:', error);
     });
 }
+
+async function aprovarCompras() {
+  await fetch('http://localhost:3001/aprovarCompras', {
+    method: 'GET',
+  })
+    .then((response) => response.json())
+    .then((data) => {
+      console.log('Resposta do backend:', data);
+    })
+    .catch((error) => {
+      console.error('Erro ao enviar dados:', error);
+    });
+}
+
+setTimeout(async function () {
+  aprovarCompras();
+}, 20000);
 </script>
 
 <template v-if="exibir">
@@ -167,7 +184,7 @@ async function getUsers() {
           <a href="#" class="nav-link px-2 text-body-secondary">About</a>
         </li>
       </ul>
-      <p class="text-center text-body-secondary">© 2023 Company, Inc</p>
+      <p class="text-center text-body-secondary">© 2023 Mundo Retro, Inc</p>
     </footer>
   </div>
 </template>

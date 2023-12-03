@@ -31,6 +31,7 @@ TROCA SOLICITADA;
 TROCA APROVADA;
 TROCA REALIZADA;
 TROCA RECUSADA.
+
 Quando um pedido estiver com STATUS ENTREGUE, o cliente poderá solicitar a troca do pedido inteiro ou de um único item de um produto. Quem altera o status do pedido é o administrador.
 
 Um pedido com TROCA SOLICITADA poderá ter sua troca aprovada pelo administrador. Quando o status for esse, o cliente enviará o produto a ser trocado para a loja, e o administrador, ao receber e verificar que o produto está de acordo, irá mudar o STATUS PARA TROCA REALIZADA, e com isso, um cupom de troca no valor do(s) item(ns) trocado(s) será disponibilizado para o cliente, que poderá utilizá-lo em uma próxima compra.

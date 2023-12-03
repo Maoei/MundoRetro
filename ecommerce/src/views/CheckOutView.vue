@@ -22,6 +22,7 @@ const enderecoData = reactive({
 const checkoutData = reactive({
   valorFinal: 0,
   idEndereco: '',
+  idEnderecoCobranca: '',
   idCliente: localStorage.id,
   idProduto: '',
   numeroCartao: '',
@@ -32,6 +33,7 @@ const checkoutData = reactive({
   valorDesconto: 0,
   valorPago: 0,
   valorFrete: 0,
+  ultimoCupom: '',
 });
 
 let id = '';
@@ -93,6 +95,7 @@ async function addCheckOut() {
     valorPago: checkoutData.valorPago,
     valorFrete: checkoutData.valorFrete,
     idEndereco: checkoutData.idEndereco,
+    idEnderecoCobranca: checkoutData.idEnderecoCobranca,
     pagamentos: pagamentosArray, // Pass the array of pagamentos objects
   };
   console.log('requestBody ' + requestBody.pagamentos[0].idProduto);
@@ -186,7 +189,10 @@ function removeCartao() {
 function validarCupom() {
   console.log('cupom ' + checkoutData.cupom);
   console.log('idCliente ' + checkoutData.idCliente);
-
+  if (checkoutData.cupom == checkoutData.ultimoCupom) {
+    alert('Cupom já utilizado!');
+    return 0;
+  }
   const requestBody = {
     idCliente: checkoutData.idCliente,
     cupom: checkoutData.cupom,
@@ -211,6 +217,8 @@ function validarCupom() {
       if (data.valor > 0) {
         checkoutData.valorPago = checkoutData.valorPago - Number(data.valor);
       }
+
+      checkoutData.ultimoCupom = checkoutData.cupom;
 
       console.log('Resposta do backend:', data);
     })
@@ -310,8 +318,10 @@ function converterParaMaiusculas() {
     <div class="row">
       <h1>Selecione o Endereço</h1>
       <div class="row">
-        <div class="col">
+        <div class="col-md-3">
           <select
+            class="form-select"
+            aria-label="Default select example"
             name=""
             id="cartao"
             v-model="checkoutData.idEndereco"
@@ -325,6 +335,7 @@ function converterParaMaiusculas() {
             </option>
           </select>
         </div>
+
         <div class="row mt-2">
           <div class="col">
             <RouterLink
@@ -335,14 +346,51 @@ function converterParaMaiusculas() {
           </div>
         </div>
       </div>
+
+      <h1>Selecione o Endereço de Cobrança</h1>
+      <div class="row">
+        <div class="col-md-3">
+          <select
+            class="form-select"
+            aria-label="Default select example"
+            name=""
+            id="cartao"
+            v-model="checkoutData.idEnderecoCobranca"
+          >
+            <option
+              v-for="endereco in enderecoData.enderecos"
+              :value="endereco.id"
+            >
+              {{ endereco.endereco }}
+            </option>
+          </select>
+        </div>
+
+        <div class="row mt-2">
+          <div class="col">
+            <RouterLink
+              class="btn btn-secondary"
+              :to="'/enderecos/cadastro/' + id"
+              >Cadastrar Novo Endereço</RouterLink
+            >
+          </div>
+        </div>
+      </div>
+
       <div class="row">
         <h1>Selecione o Método de Pagamento</h1>
         <div class="row">
           <h2>Escolha o Cartão</h2>
         </div>
         <div class="row">
-          <div class="col">
-            <select name="" id="cartao_0" v-model="checkoutData.cartoes[0].id">
+          <div class="col-md-3">
+            <select
+              class="form-select"
+              aria-label="Default select example"
+              name=""
+              id="cartao_0"
+              v-model="checkoutData.cartoes[0].id"
+            >
               <option v-for="cartao in cartoesData.cartoes" :value="cartao">
                 {{ cartao.numeroCartao }}
               </option>

@@ -140,7 +140,7 @@ app.get('/getProdutos', (req, res) => {
   console.log(req.body);
 
   // Query to fetch all products
-  const selectQuery = 'SELECT * FROM produtos';
+  const selectQuery = 'SELECT * FROM produtos WHERE qtd > 0';
 
   // Run the query
   connection.query(selectQuery, (error, results) => {
@@ -529,6 +529,7 @@ app.post('/checkout/finalizar', (req, res) => {
     idCliente,
     valorFinal,
     idEndereco,
+    idEnderecoCobranca,
     valorPago,
     valorDesconto,
     valorFrete,
@@ -542,6 +543,7 @@ app.post('/checkout/finalizar', (req, res) => {
     idCliente &&
     valorFinal &&
     idEndereco &&
+    idEnderecoCobranca &&
     pagamentos &&
     valorPago &&
     valorFrete &&
@@ -549,7 +551,7 @@ app.post('/checkout/finalizar', (req, res) => {
   ) {
     let total = valorFinal + valorFrete;
     const checkoutQuery =
-      'INSERT INTO checkout (valorFinal, idCliente, idEndereco, status, valorPago, valorDesconto, valorFrete) VALUES (?, ?, ?, ?, ?, ?, ?)';
+      'INSERT INTO checkout (valorFinal, idCliente, idEndereco, status, valorPago, valorDesconto, valorFrete, idEnderecoCobranca) VALUES (?, ?, ?, ?, ?, ?, ?, ?)';
     connection.query(
       checkoutQuery,
       [
@@ -560,6 +562,7 @@ app.post('/checkout/finalizar', (req, res) => {
         valorPago,
         valorDesconto,
         valorFrete,
+        idEnderecoCobranca,
       ],
       (checkoutError, checkoutResults, checkoutFields) => {
         if (checkoutError) {
@@ -759,6 +762,7 @@ app.post('/trocarStatus', (req, res) => {
   const idProduto = req.body.idProduto;
   const valorCupom = req.body.valorCupom;
   const idCliente = req.body.idCliente;
+  const qtd = req.body.qtd;
 
   console.log('idCheckOut ' + idCheckOut);
   console.log('novoStatus ' + novoStatus);
@@ -768,6 +772,29 @@ app.post('/trocarStatus', (req, res) => {
 
   // Query to update the status in checkoutProdutos table
   const updateCheckoutProdutosQuery = `UPDATE checkoutProdutos SET status = ? WHERE idCheckOut = ? AND idProduto = ?`;
+
+  if (novoStatus == 'TROCA APROVADA') {
+    const selectProdutoQuery = `SELECT * FROM produtos WHERE id = ${idProduto} `;
+
+    connection.query(selectProdutoQuery, (selectErr, selectResult) => {
+      const prodQuantity = parseInt(selectResult[0].qtd);
+
+      let finalDiff = prodQuantity + qtd;
+      console.log('finaldiff: ', finalDiff);
+      connection.beginTransaction((beginTransactionErr) => {
+        if (beginTransactionErr) {
+          res.status(500).send('Error starting transaction');
+          return;
+        }
+
+        const updateProdutosQuery = `UPDATE produtos SET qtd = ${finalDiff} WHERE id = ${idProduto}`;
+        connection.query(
+          updateProdutosQuery,
+          (updateProdErr, updateProdResult) => {}
+        );
+      });
+    });
+  }
 
   // Query to update the status in checkoutPagamentos table
   const updateCheckoutPagamentosQuery = `UPDATE checkoutPagamentos SET status = ? WHERE idCheckOut = ?`;
@@ -938,16 +965,30 @@ app.get('/getCuponsExpirados/:id', async (req, res) => {
 });
 
 // Rota da tabela checkoutProdutos por cliente
-app.get('/getCheckoutProdutosId/:id', (req, res) => {
+app.get('/getCheckoutProdutosId/:id/:status', (req, res) => {
   const idCliente = req.params.id;
+  const statusPedidos = req.params.status;
   console.log('idCliente ' + idCliente);
+  console.log('statusPedidos ' + statusPedidos);
+
+  let selectQuery = '';
+
+  if (statusPedidos == 'TODOS') {
+    selectQuery = `SELECT checkoutProdutos.idProduto, checkoutProdutos.idCheckOut, checkoutProdutos.valorProduto, checkoutProdutos.status,
+    produtos.qtd, produtos.titulo, produtos.descrProduto, produtos.dtCompra, produtos.genero, produtos.valor 
+  FROM checkout
+  JOIN checkoutProdutos ON checkoutProdutos.idCheckOut = checkout.id
+  JOIN produtos ON produtos.id = checkoutProdutos.idProduto
+  WHERE checkout.idCliente = ?`;
+  } else {
+    selectQuery = `SELECT checkoutProdutos.idProduto, checkoutProdutos.idCheckOut, checkoutProdutos.valorProduto, checkoutProdutos.status,
+    produtos.qtd, produtos.titulo, produtos.descrProduto, produtos.dtCompra, produtos.genero, produtos.valor 
+  FROM checkout
+  JOIN checkoutProdutos ON checkoutProdutos.idCheckOut = checkout.id
+  JOIN produtos ON produtos.id = checkoutProdutos.idProduto
+  WHERE checkout.idCliente = ? AND checkout.status = '${statusPedidos}'`;
+  }
   // Query to fetch all products
-  const selectQuery = `SELECT checkoutProdutos.idProduto, checkoutProdutos.idCheckOut, checkoutProdutos.valorProduto, checkoutProdutos.status,
-                        produtos.qtd, produtos.titulo, produtos.descrProduto, produtos.dtCompra, produtos.genero, produtos.valor 
-                      FROM checkout
-                      JOIN checkoutProdutos ON checkoutProdutos.idCheckOut = checkout.id
-                      JOIN produtos ON produtos.id = checkoutProdutos.idProduto
-                      WHERE checkout.idCliente = ?`;
 
   // Run the query
   connection.query(selectQuery, [idCliente], (error, results) => {
@@ -1046,26 +1087,100 @@ app.post('/trocaSolicitada', (req, res) => {
 
 // Rota para buscar dados do gráfico
 app.get('/getGrafico', (req, res) => {
-  console.log(req.body);
+  console.log('ini = ' + req.query.ini);
+  console.log('fim = ' + req.query.fim);
 
-  const selectQuery = `
-  SELECT checkoutPagamentos.idProduto, checkoutPagamentos.valorProduto, checkoutPagamentos.dtCompra
-  FROM checkout
-  JOIN checkoutPagamentos ON checkout.id = checkoutPagamentos.idCheckout
-  WHERE checkoutPagamentos.dtCompra BETWEEN ${} AND ${}
-  GROUP BY checkoutPagamentos.idProduto, checkoutPagamentos.dtCompra, checkoutPagamentos.valorProduto
-  ORDER BY checkoutPagamentos.dtCompra
-`;
+  let ini = req.query.ini;
+  let fim = req.query.fim;
+
+  try {
+    // Organize the fetched data for Chart.js
+    const dataByProductId = {};
+
+    // Fetch data from the checkoutPagamentos table
+    connection.query(
+      `SELECT idProduto, DATE_FORMAT(dtCompra, "%Y-%m-%d") AS dtCompra, valorProduto 
+      FROM checkoutPagamentos
+      WHERE dtCompra BETWEEN '${ini}' AND '${fim}'`,
+      (error, resuts) => {
+        resuts.forEach((row) => {
+          const { idProduto, dtCompra, valorProduto } = row;
+
+          if (!dataByProductId[idProduto]) {
+            dataByProductId[idProduto] = [];
+          }
+
+          //dataByProductId[idProduto].push({ dtCompra, valorProduto });
+          dataByProductId[idProduto][dtCompra] = parseFloat(valorProduto);
+        });
+
+        // Get all unique dates across all idProduto
+        const allDates = Array.from(
+          new Set(
+            Object.values(dataByProductId).flatMap((obj) => Object.keys(obj))
+          )
+        ).sort();
+
+        // Ensure all idProduto have entries for all dates, inserting 0 when there's no entry
+        Object.values(dataByProductId).forEach((productData) => {
+          allDates.forEach((date) => {
+            if (!(date in productData)) {
+              productData[date] = 0;
+            }
+          });
+        });
+
+        // Prepare the data to be sent as a response
+        // const response = {
+        //   labels: [...new Set(resuts.map(row => row.dtCompra))], // Unique dates for x-axis labels
+        //   datasets: Object.entries(dataByProductId).map(([idProduto, data]) => ({
+        //     label: `ID ${idProduto}`,
+        //     data: data.map(entry => entry.valorProduto),
+        //     borderColor: `#${Math.floor(Math.random() * 16777215).toString(16)}`, // Random border color
+        //     fill: false
+        //   }))
+        // };
+
+        // Prepare the final response
+        const formattedData = {
+          labels: allDates,
+          datasets: Object.entries(dataByProductId).map(
+            ([idProduto, productData]) => ({
+              label: `ID ${idProduto}`,
+              data: allDates.map((date) => productData[date]),
+              borderColor: `#${Math.floor(Math.random() * 16777215).toString(
+                16
+              )}`, // Random border color
+              fill: false,
+            })
+          ),
+        };
+
+        res.json(formattedData);
+      }
+    );
+  } catch (err) {
+    console.error('Error fetching data:', err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+//rota da tabela aprovarCompras
+app.get('/aprovarCompras', (req, res) => {
+  console.log(req.body);
+  console.log('testes');
+  // Query to fetch all products
+  const updateCheckoutQuery = `UPDATE checkout SET status = 'PEDIDO APROVADO' WHERE status = 'EM PROCESSAMENTO' `;
+
+  const updateCheckoutProdutosQuery = `UPDATE checkoutProdutos SET status = 'PEDIDO APROVADO' WHERE status = 'EM PROCESSAMENTO' `;
+
+  const updateCheckoutPagamentosQuery = `UPDATE checkoutPagamentos SET status = 'PEDIDO APROVADO' WHERE status = 'EM PROCESSAMENTO' `;
 
   // Run the query
-  connection.query(selectQuery, (error, results) => {
-    if (error) {
-      console.error('Erro ao buscar dados para o gráfico:', error);
-      res.status(500).send('Erro interno do servidor');
-      throw error;
-    }
-    res.status(200).json(results);
-  });
+  connection.query(updateCheckoutQuery, (error, results) => {});
+  connection.query(updateCheckoutProdutosQuery, (error, results) => {});
+  connection.query(updateCheckoutPagamentosQuery, (error, results) => {});
+  res.status(200);
 });
 
 app.post('/teste', (req, res) => {

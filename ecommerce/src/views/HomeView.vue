@@ -31,9 +31,28 @@ async function getProdutos() {
 
 <template>
   <main>
-    <div class="container" style="background-color: bisque">
+    <div class="container">
       <div class="row">
-        <div class="col" v-for="produto in produtoData.produtos">
+        <div class="col">
+          <div
+            id="carouselExampleSlidesOnly"
+            class="carousel slide"
+            data-bs-ride="carousel"
+          >
+            <div class="carousel-inner">
+              <div class="carousel-item active" style="height: 30rem">
+                <img
+                  src="../../src/assets/images/home2.jpg"
+                  class="d-block w-100"
+                  alt="..."
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="row mt-2">
+        <div class="col mt-2" v-for="produto in produtoData.produtos">
           <div class="card" style="width: 18rem">
             <img
               :src="'../src/assets/images/' + produto.id + '.png'"
@@ -54,40 +73,6 @@ async function getProdutos() {
             </div>
           </div>
         </div>
-
-        <div class="col">
-          <div class="card" style="width: 18rem">
-            <img src="..." class="card-img-top" alt="..." />
-            <div class="card-body">
-              <h5 class="card-title">Card title</h5>
-              <p class="card-text">
-                Some quick example text to build on the card title and make up
-                the bulk of the card's content.
-              </p>
-              <a href="#" class="btn btn-secondary" style="margin-right: 2px"
-                >R$ 123.99</a
-              >
-              <a href="#" class="btn btn-primary">Comprar</a>
-            </div>
-          </div>
-        </div>
-
-        <div class="col">
-          <div class="card" style="width: 18rem">
-            <img src="..." class="card-img-top" alt="..." />
-            <div class="card-body">
-              <h5 class="card-title">Card title</h5>
-              <p class="card-text">
-                Some quick example text to build on the card title and make up
-                the bulk of the card's content.
-              </p>
-              <a href="#" class="btn btn-primary">Go somewhere</a>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div class="row">
-        <h1>Teste</h1>
       </div>
     </div>
   </main>

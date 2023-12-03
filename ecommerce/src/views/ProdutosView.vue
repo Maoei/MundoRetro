@@ -37,6 +37,21 @@ async function getProdutos() {
           <h1 class="text-center">Produtos</h1>
         </div>
       </div>
+      <div class="row">
+        <div class="col">
+          <form class="d-flex" role="search">
+            <input
+              class="form-control me-2"
+              type="search"
+              placeholder="Search"
+              aria-label="Search"
+            />
+            <button class="btn btn-outline-success" type="submit">
+              Search
+            </button>
+          </form>
+        </div>
+      </div>
       <div class="row mt-2">
         <div class="col" v-for="produto in produtoData.produtos">
           <div class="card" style="width: 18rem">

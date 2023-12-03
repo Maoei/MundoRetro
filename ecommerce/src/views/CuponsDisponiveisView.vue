@@ -34,11 +34,21 @@ async function getCupons() {
 
 <template v-if="exibir">
   <main>
-    <h3>Lista de Cupons</h3>
-    <div class="card-body">
-      <li v-for="cupom in cuponsData.cupons">
-        {{ cupom.codigoCupon + ': ' + cupom.descrCupom }}
-      </li>
+    <div class="container">
+      <div class="row">
+        <div class="col">
+          <h3>Lista de Cupons</h3>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col">
+          <div class="card" v-for="cupom in cuponsData.cupons">
+            <div class="card-body" style="white-space: pre-line">
+              {{ cupom.codigoCupon + ': ' + cupom.descrCupom }}
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </main>
 </template>

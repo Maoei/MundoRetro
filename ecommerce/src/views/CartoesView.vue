@@ -44,6 +44,17 @@ async function getCartoes() {
       <div class="row">
         <div class="col">
           <div class="card" v-for="cartao in cartoesData.cartoes">
+            <div>
+              <img
+                :src="
+                  '../../src/assets/images/cartoes/' +
+                  cartao.numeroCartao.charAt(0) +
+                  '.jpg'
+                "
+                height="50"
+                width="50"
+              />
+            </div>
             <div class="card-body" style="white-space: pre-line">
               {{
                 'Nome do titular: ' +

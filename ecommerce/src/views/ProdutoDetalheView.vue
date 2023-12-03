@@ -63,43 +63,49 @@ async function addCarrinho(id) {
 <template>
   <main>
     <div class="container text-center">
-      <div class="col-md-12">
-        <h1>{{ produtoData.produtos.titulo }}</h1>
-      </div>
-      <div class="row justify-content-md-center">
-        <div class="col">
-          <div class="card-body">
+      <div class="card mb-3" style="max-width: 1200px">
+        <div class="row g-0">
+          <div class="col-md-4">
             <img
               :src="
                 '../../src/assets/images/' + produtoData.produtos.id + '.png'
               "
+              class="img-fluid rounded-start"
               alt="..."
-              width="240"
-              height="240"
+              width="340"
+              height="340"
             />
           </div>
-        </div>
-      </div>
-      <div class="row justify-content-md-center">
-        <div class="col">
-          <form>
-            <div class="mb-3 offset-md-4 col-md-4">
-              <input
-                class="form-control"
-                type="number"
-                min="1"
-                :max="produtoData.produtos.qtd"
-                v-model="produtoData.data.qtd"
-              />
-              Qtd
+          <div class="col-md-8">
+            <div class="card-body">
+              <h5 class="card-title">{{ produtoData.produtos.titulo }}</h5>
+              <p class="card-text">
+                {{ produtoData.produtos.descrProduto }}
+              </p>
+              <div class="row justify-content-md-center">
+                <div class="col">
+                  <form>
+                    <div class="mb-3 offset-md-4 col-md-4">
+                      Qtd
+                      <input
+                        class="form-control"
+                        type="number"
+                        min="1"
+                        :max="produtoData.produtos.qtd"
+                        v-model="produtoData.data.qtd"
+                      />
+                    </div>
+                  </form>
+                  <button
+                    class="btn btn-secondary"
+                    v-on:click="addCarrinho(produtoData.produtos.id)"
+                  >
+                    Comprar
+                  </button>
+                </div>
+              </div>
             </div>
-          </form>
-          <button
-            class="btn btn-primary"
-            v-on:click="addCarrinho(produtoData.produtos.id)"
-          >
-            Comprar
-          </button>
+          </div>
         </div>
       </div>
     </div>

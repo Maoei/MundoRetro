@@ -6,11 +6,20 @@ import { createStructuralDirectiveTransform } from '@vue/compiler-core';
 const graficoData = reactive({
   name: '',
   dados: [],
+  ini: '2023-11-01',
+  fim: '2023-12-10',
 });
 
 let exibir = false;
 
 onMounted(async () => {
+  if (localStorage.dtInicio != null) {
+    graficoData.ini = localStorage.dtInicio;
+  }
+  if (localStorage.dtFim != null) {
+    graficoData.fim = localStorage.dtFim;
+  }
+
   await getGrafico();
 
   // Certifique-se de que o elemento myChart existe no DOM
@@ -21,80 +30,39 @@ onMounted(async () => {
     return;
   }
 
-  let rrObjects = [];
-  let r = 255;
-  let datas = [];
-  let valores = [];
+  // Now you can use chartLabels as x-axis labels and chartDataset as your dataset in Chart.js
+  //console.log(chartLabels); // Array of dtCompra values (x-axis labels)
+  //console.log(chartDataset); // Array of datasets for Chart.js
 
-  graficoData.dados.forEach((item) => {
-    valores[item.idProduto] = [];
-    let count = valores[item.idProduto].push([item.valorProduto]);
-    valores[item.idProduto].push([item.dtCompra]);
-    console.log('valores ' + valores[item.idProduto]);
-    console.log('count ' + count);
-    console.log('item.valorProduto ' + item.valorProduto);
-  });
+  // Get all unique dates
+  const allDates = graficoData.dados.labels.reduce((acc, curr) => {
+    if (!acc.includes(curr)) {
+      acc.push(curr);
+    }
+    return acc;
+  }, []);
 
-  let arrayValores = [];
+  // Sort dates in chronological order
+  allDates.sort((a, b) => new Date(a) - new Date(b));
 
-  graficoData.dados.forEach((item) => {
-    datas.push(item.dtCompra);
-    let count = 1;
-    //console.log('item.somaVlrProduto ' + item.somaVlrProduto);
-    valores.forEach((value, index) => {
-      if (index == item.idProduto) {
-        console.log('é igual');
-        //let temp = value.split(',');
-        console.log('value ' + typeof value);
-        if (value[1] == item.dtCompra) {
-          console.log('igual a dtCompra');
-          arrayValores[count] = item.valorProduto;
-        } else {
-          arrayValores[count] = 0;
-        }
-      }
-      count++;
+  // Generate datasets with empty values for dates without data
+  const updatedDatasets = graficoData.dados.datasets.map((dataset) => {
+    const newData = allDates.map((date) => {
+      const index = graficoData.dados.labels.indexOf(date);
+      return index !== -1 ? dataset.data[index] : null;
     });
-    console.log('arrayValores ' + arrayValores);
-    rrObjects.push({
-      data: arrayValores,
-      backgroundColor: [
-        `rgba(${r}, 99, 132, 0.2)`,
-        'rgba(54, 162, 235, 0.2)',
-        'rgba(255, 206, 86, 0.2)',
-        'rgba(75, 192, 192, 0.2)',
-        'rgba(153, 102, 255, 0.2)',
-        'rgba(255, 159, 64, 0.2)',
-      ],
-      borderColor: [
-        `rgba(${r}, 99, 132, 0.2)`,
-        'rgba(54, 162, 235, 1)',
-        'rgba(255, 206, 86, 1)',
-        'rgba(75, 192, 192, 1)',
-        'rgba(153, 102, 255, 1)',
-        'rgba(255, 159, 64, 1)',
-      ],
-      borderWidth: 1,
-    });
-    arrayValores = [];
-    r -= 10;
+
+    return { ...dataset, data: newData };
   });
-
-  let datasExibir = [];
-
-  graficoData.dados.forEach((item) => {
-    datasExibir.push(item.dtCompra);
-  });
-
-  let labelsData = [...new Set(datasExibir)];
 
   const myChart = new Chart(ctx, {
     type: 'line',
     data: {
-      labels: labelsData,
-      datasets: rrObjects,
+      labels: allDates,
+      datasets: updatedDatasets,
     },
     options: {
+      responsive: true,
       scales: {
         y: {
           beginAtZero: true,
@@ -105,22 +73,56 @@ onMounted(async () => {
 });
 
 async function getGrafico() {
+  let ini = '';
+  let fim = '';
+
+  if (localStorage.dtInicio == null) {
+    ini = '2023-12-01';
+  } else {
+    ini = localStorage.dtInicio;
+  }
+
+  if (localStorage.dtFim == null) {
+    fim = '2023-12-03';
+  } else {
+    fim = localStorage.dtFim;
+  }
+
+  //ini = '2023-12-01';
+  //fim = '2023-12-03';
+
+  console.log('ini = ' + ini);
+  console.log('fim = ' + fim);
+
   try {
-    const response = await fetch('http://localhost:3001/getGrafico', {
-      method: 'GET',
-    });
+    const response = await fetch(
+      `http://localhost:3001/getGrafico?ini=${ini}&fim=${fim}`,
+      {
+        method: 'GET',
+      }
+    );
 
     if (!response.ok) {
       throw new Error(`Erro ao buscar dados. Código: ${response.status}`);
     }
 
     const data = await response.json();
-    console.log('Resposta do backend:', data);
-    graficoData.dados = data;
+    console.log('Resposta do backend grafico:', data);
+    const { labels, datasets } = data;
+
+    graficoData.dados.labels = labels;
+    graficoData.dados.datasets = datasets;
+
     exibir = true;
   } catch (error) {
     console.error('Erro ao enviar dados:', error);
   }
+}
+
+function updateDates(inicio, fim) {
+  localStorage.dtInicio = inicio;
+  localStorage.dtFim = fim;
+  window.location.reload();
 }
 </script>
 
@@ -136,6 +138,28 @@ async function getGrafico() {
     <div class="row">
       <div class="col-md-6">
         <canvas id="myChart" width="100" height="100"></canvas>
+      </div>
+    </div>
+  </div>
+  <div class="container">
+    <div class="row">
+      <div class="col">
+        <label> Data Início </label
+        ><input
+          type="date"
+          v-model="graficoData.ini"
+          v-on:change="updateDates(graficoData.ini, graficoData.fim)"
+        />
+      </div>
+      <div class="col">
+        <div class="col">
+          <label> Data Fim </label
+          ><input
+            type="date"
+            v-model="graficoData.fim"
+            v-on:change="updateDates(graficoData.ini, graficoData.fim)"
+          />
+        </div>
       </div>
     </div>
   </div>

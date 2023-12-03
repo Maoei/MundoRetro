@@ -1,15 +1,17 @@
 <script setup>
 import { ref, onMounted, reactive } from 'vue';
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 
 const checkoutProdutosData = reactive({
   name: '',
   produtos: [],
+  qtd: 0,
 });
 
 let id = '';
 let exibir = false;
 const route = useRoute();
+const router = useRouter();
 
 onMounted(async () => {
   id = route.params.id;
@@ -24,6 +26,9 @@ function getCheckoutProdutosDetalhe() {
   })
     .then((response) => response.json())
     .then((data) => {
+      data.forEach((item) => {
+        checkoutProdutosData.qtd++;
+      });
       console.log('Resposta do backend:', data);
       checkoutProdutosData.produtos = data;
       exibir = true;
@@ -43,6 +48,7 @@ function trocarStatus(produto) {
     status: status,
     observacao: produto.observacao,
     valorCupom: produto.valorProduto,
+    qtd: checkoutProdutosData.qtd,
   };
   console.log('status ' + requestBody.status);
   console.log('idCheckOut ' + requestBody.idCheckOut);
@@ -50,6 +56,7 @@ function trocarStatus(produto) {
   console.log('idProduto ' + requestBody.idProduto);
   console.log('valorCupom ' + requestBody.valorCupom);
   console.log('idCliente ' + requestBody.idCliente);
+  console.log('qtd ' + requestBody.qtd);
 
   fetch(`http://localhost:3001/trocarStatus`, {
     method: 'POST',
@@ -61,6 +68,7 @@ function trocarStatus(produto) {
     .then((response) => response.json())
     .then((data) => {
       console.log('Resposta do backend:', data);
+      router.push('/admin');
     })
     .catch((error) => {
       console.error('Erro ao enviar dados:', error);

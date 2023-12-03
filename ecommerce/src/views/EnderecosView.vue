@@ -44,8 +44,9 @@ async function getEnderecos() {
       <div class="row">
         <div class="col">
           <div class="card" v-for="endereco in enderecoData.enderecos">
-            <div class="card-body" style="white-space: pre-line">
+            <div class="card-body">
               {{
+                'Endereço de Entrega: ' +
                 endereco.cep +
                 ', ' +
                 endereco.endereco +
@@ -62,14 +63,12 @@ async function getEnderecos() {
               }}
             </div>
           </div>
-          <div class="row">
-            <div class="col">
-              <RouterLink
-                class="btn btn-primary"
-                :to="'/enderecos/cadastro/' + id"
-                >Cadastrar Novo Endereço</RouterLink
-              >
-            </div>
+          <div class="col">
+            <RouterLink
+              class="btn btn-secondary"
+              :to="'/enderecos/cadastro/' + id"
+              >Cadastrar Novo Endereço</RouterLink
+            >
           </div>
         </div>
       </div>
