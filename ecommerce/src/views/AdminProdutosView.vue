@@ -74,9 +74,7 @@ async function getProdutos() {
             />
             <div class="card-body">
               <h5 class="card-title">
-                <RouterLink :to="'/produtos/detalhe/' + produto.id">{{
-                  produto.titulo
-                }}</RouterLink>
+                {{ produto.titulo }}
               </h5>
               <p class="card-text">{{ produto.descrProduto }}</p>
               <a href="#" class="btn btn-secondary" style="margin-right: 2px"

@@ -276,7 +276,7 @@ function converterParaMaiusculas() {
                 v-for="produto in carrinhoData.produtos"
                 :key="produto.id"
               >
-                <div class="card mb-3" style="max-width: 540px">
+                <div class="card mb-3 mt-3" style="max-width: 1200px">
                   <div class="row g-0">
                     <div class="col-md-4">
                       <img
@@ -293,16 +293,20 @@ function converterParaMaiusculas() {
                         <p class="card-text">
                           {{ produto.descrProduto }}
                         </p>
-                        <p class="card-text">
-                          <input
-                            type="number"
-                            min="1"
-                            :max="produto.produto_qtd"
-                            v-model="produto.qtd"
-                            v-on:change="
-                              addCarrinho(produto.produto_id, produto.qtd)
-                            "
-                          />
+                        <p class="card-text ">
+                          <div class="mb-3 offset-md-4 col-md-4 justify-content-center">
+                            <input
+                              class="form-control "
+                              type="number"
+                              min="1"
+                              :max="produto.produto_qtd"
+                              v-model="produto.qtd"
+                              v-on:change="
+                                addCarrinho(produto.produto_id, produto.qtd)
+                              "
+                              disabled
+                            />
+                          </div>
                         </p>
                       </div>
                     </div>
@@ -323,7 +327,7 @@ function converterParaMaiusculas() {
             class="form-select"
             aria-label="Default select example"
             name=""
-            id="cartao"
+            id="endereco"
             v-model="checkoutData.idEndereco"
             v-on:change="calcularFrete()"
           >
@@ -336,15 +340,6 @@ function converterParaMaiusculas() {
           </select>
         </div>
 
-        <div class="row mt-2">
-          <div class="col">
-            <RouterLink
-              class="btn btn-secondary"
-              :to="'/enderecos/cadastro/' + id"
-              >Cadastrar Novo Endereço</RouterLink
-            >
-          </div>
-        </div>
       </div>
 
       <h1>Selecione o Endereço de Cobrança</h1>
@@ -354,7 +349,7 @@ function converterParaMaiusculas() {
             class="form-select"
             aria-label="Default select example"
             name=""
-            id="cartao"
+            id="enderecoCobranca"
             v-model="checkoutData.idEnderecoCobranca"
           >
             <option
@@ -400,12 +395,15 @@ function converterParaMaiusculas() {
         <div class="row">
           <div class="col">
             <h2>Valor a Pagar no Cartão</h2>
-            <input
-              type="number"
-              v-model="checkoutData.cartoes[0].valor"
-              min="10"
-              :max="carrinhoData.valorTotal + checkoutData.valorFrete"
-            />
+            <div class="col-md-1">
+              <input
+                class="form-control"
+                type="number"
+                v-model="checkoutData.cartoes[0].valor"
+                min="10"
+                :max="carrinhoData.valorTotal + checkoutData.valorFrete"
+              />
+            </div>
           </div>
         </div>
 

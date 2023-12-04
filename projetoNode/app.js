@@ -2,6 +2,7 @@ const express = require('express');
 var bodyParser = require('body-parser');
 const mysql = require('mysql2');
 var cors = require('cors');
+const userController = require('./controllers/userController');
 
 const connection = mysql.createConnection({
   host: 'localhost',
@@ -39,7 +40,7 @@ app.get('/getUsers', (req, res) => {
   console.log(req.body);
 
   // Query to fetch all clients
-  const selectQuery = 'SELECT * FROM clientes';
+  const selectQuery = `SELECT id,nome, email, cpfcnpj, DATE_FORMAT(dtnascimento, '%d-%m-%Y') as dtnascimento, usr, senha, genero, telefone FROM clientes`;
 
   // Run the query
   connection.query(selectQuery, (error, results) => {
@@ -51,27 +52,8 @@ app.get('/getUsers', (req, res) => {
   });
 });
 
-app.get('/getUser/:id', (req, res) => {
-  console.log(req.body);
-  const clientId = req.params.id;
-
-  // Query to fetch a single client based on the ID
-  const selectQuery = 'SELECT * FROM clientes WHERE id = ?';
-
-  // Run the query
-  connection.query(selectQuery, [clientId], (error, results) => {
-    if (error) {
-      res.status(500).send('Error fetching client');
-      throw error;
-    }
-
-    if (results.length > 0) {
-      res.status(200).json(results[0]); // Assuming the ID is unique, so we return the first (and only) result
-    } else {
-      res.status(404).send('Client not found');
-    }
-  });
-});
+// Rota para obter detalhes do usuário
+app.get('/getUser/:id', userController.getUser);
 
 app.post('/createUser', (req, res) => {
   console.log(req.body);
@@ -103,17 +85,27 @@ app.post('/createUser', (req, res) => {
 });
 
 // Endpoint to update a user
-app.put('/update-user/:userId', (req, res) => {
+app.put('/updateUser/:id', (req, res) => {
   console.log(req.body);
-  const userId = req.params.userId;
+  const userId = req.params.id;
+  console.log('userId ' + userId);
+
   const { nome, email, cpfcnpj, dtnascimento, usr, senha, genero, telefone } =
-    req.body;
+    req.body.clientes;
+  console.log('nome ' + req.body.clientes.nome);
+  console.log('email ' + req.body.clientes.email);
+  console.log('cpfcnpj ' + req.body.clientes.cpfcnpj);
+  console.log('dtnascimento ' + req.body.clientes.dtnascimento);
+  console.log('usr ' + req.body.clientes.usr);
+  console.log('senha ' + req.body.clientes.senha);
+  console.log('genero ' + req.body.clientes.genero);
+  console.log('telefone ' + req.body.clientes.telefone);
 
   // Create the UPDATE query
   const updateQuery = `
         UPDATE clientes
         SET nome = ?, email = ?, cpfcnpj = ?, dtnascimento = ?, usr = ?, senha = ?, genero = ?, telefone = ?
-        WHERE id = ?
+        WHERE id = ${userId}
     `;
 
   connection.connect();
@@ -121,26 +113,49 @@ app.put('/update-user/:userId', (req, res) => {
   // Run the query
   connection.query(
     updateQuery,
-    [nome, email, cpfcnpj, dtnascimento, usr, senha, genero, telefone, userId],
+    [nome, email, cpfcnpj, dtnascimento, usr, senha, genero, telefone],
     (error, results) => {
       if (error) {
-        res.status(500).send('Error updating user');
-        throw error;
+        connection.rollback(() => {
+          res.status(500).send('Error updating user');
+          throw error;
+        });
       }
       res.status(200).send('User updated successfully');
     }
   );
-
-  connection.end();
 });
 
 //rotas de produtos
-
 app.get('/getProdutos', (req, res) => {
   console.log(req.body);
 
   // Query to fetch all products
   const selectQuery = 'SELECT * FROM produtos WHERE qtd > 0';
+
+  // Run the query
+  connection.query(selectQuery, (error, results) => {
+    if (error) {
+      res.status(500).send('Error fetching products');
+      throw error;
+    }
+    res.status(200).json(results);
+  });
+});
+
+//rotas de produtos com filtro
+app.get('/getProdutos/:genero', (req, res) => {
+  console.log(req.body);
+  genero = req.params.genero;
+  console.log('genero ' + genero);
+
+  let selectQuery = '';
+
+  if (genero == 'Todos') {
+    selectQuery = `SELECT * FROM produtos WHERE qtd > 0`;
+  } else {
+    selectQuery = `SELECT * FROM produtos WHERE qtd > 0 AND genero = '${genero}'`;
+  }
 
   // Run the query
   connection.query(selectQuery, (error, results) => {
@@ -229,7 +244,7 @@ app.put('/updateProduto/:id', (req, res) => {
 //simulacao de estoque
 //adicionar produto ao carrinho
 app.post('/add-to-cart', (req, res) => {
-  const { clienteId, produtoId, qtd } = req.body; // Assuming data is sent via POST request
+  const { clienteId, produtoId, qtd } = req.body;
 
   // Check if the product exists in the cart
   const selectQuery = `SELECT carrinho.*, produtos.qtd as produto_qtd, titulo FROM carrinho JOIN produtos ON carrinho.produto_id = produtos.id WHERE cliente_id = ${clienteId} AND produto_id = ${produtoId}`;
@@ -365,8 +380,7 @@ app.get('/getCarrinho/:id', (req, res) => {
 app.delete('/removeFromCarrinho/:id', (req, res) => {
   console.log(req.body);
   const carrinhoId = req.params.id; // Acessando o parâmetro 'id' diretamente
-  // Obtenha o clienteId de onde quer que você o tenha no aplicativo
-  const clienteId = req.body.clienteId; // Exemplo: se estiver no corpo da requisição
+  const clienteId = req.body.clienteId;
 
   const selectQuery =
     'SELECT produto_id, qtd FROM carrinho WHERE id = ? AND cliente_id = ?';
@@ -448,7 +462,22 @@ app.get('/getEnderecos/:id', (req, res) => {
       res.status(500).send('Erro ao buscar endereços por cliente.');
       throw error;
     }
-    res.json(results); // Retorna os resultados em formato JSON
+    res.json(results);
+  });
+});
+
+// Rota para listar endereços por cliente e idEndereco
+app.get('/getEnderecosId/:idEndereco', (req, res) => {
+  const idEndereco = req.params.idEndereco;
+  console.log('idEndereco ' + idEndereco);
+  const query = `SELECT id, cep, endereco, COALESCE(numero,'') AS numero, COALESCE(complemento,'') AS complemento, bairro, cidade, estado  FROM enderecos WHERE id = ?`;
+
+  connection.query(query, idEndereco, (error, results, fields) => {
+    if (error) {
+      res.status(500).send('Erro ao buscar endereços por cliente.');
+      throw error;
+    }
+    res.json(results);
   });
 });
 
@@ -667,6 +696,37 @@ app.get('/getCheckoutProdutos', (req, res) => {
             produtos.qtd, produtos.titulo, produtos.descrProduto, produtos.dtCompra, produtos.genero, produtos.valor 
     FROM checkoutProdutos 
     JOIN produtos ON produtos.id = checkoutProdutos.idProduto`;
+
+  // Run the query
+  connection.query(selectQuery, (error, results) => {
+    if (error) {
+      res.status(500).send('Error fetching products');
+      throw error;
+    }
+    res.status(200).json(results);
+  });
+});
+
+//rota da tabela checkoutProdutos com filtro
+app.get('/getCheckoutProdutos/:status', (req, res) => {
+  console.log(req.body);
+  let statusPedidos = req.params.status;
+  console.log('statusPedidos' + statusPedidos);
+
+  let selectQuery = '';
+
+  if (statusPedidos == 'TODOS') {
+    selectQuery = `SELECT checkoutProdutos.idProduto, checkoutProdutos.idCheckOut, checkoutProdutos.valorProduto, checkoutProdutos.status,
+    produtos.qtd, produtos.titulo, produtos.descrProduto, produtos.dtCompra, produtos.genero, produtos.valor 
+FROM checkoutProdutos 
+JOIN produtos ON produtos.id = checkoutProdutos.idProduto`;
+  } else {
+    selectQuery = `SELECT checkoutProdutos.idProduto, checkoutProdutos.idCheckOut, checkoutProdutos.valorProduto, checkoutProdutos.status,
+    produtos.qtd, produtos.titulo, produtos.descrProduto, produtos.dtCompra, produtos.genero, produtos.valor 
+FROM checkoutProdutos 
+JOIN produtos ON produtos.id = checkoutProdutos.idProduto 
+WHERE checkoutProdutos.status = '${statusPedidos}'`;
+  }
 
   // Run the query
   connection.query(selectQuery, (error, results) => {

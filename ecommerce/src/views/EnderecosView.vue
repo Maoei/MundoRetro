@@ -43,10 +43,10 @@ async function getEnderecos() {
 
       <div class="row">
         <div class="col">
-          <div class="card" v-for="endereco in enderecoData.enderecos">
+          <div class="card mt-3" v-for="endereco in enderecoData.enderecos">
             <div class="card-body">
               {{
-                'Endereço de Entrega: ' +
+                'Endereço: ' +
                 endereco.cep +
                 ', ' +
                 endereco.endereco +
@@ -61,9 +61,14 @@ async function getEnderecos() {
                 ', ' +
                 endereco.estado
               }}
+              <RouterLink
+                class="btn btn-secondary float-end"
+                :to="'/enderecos/editar/' + endereco.id"
+                >Editar Endereço</RouterLink
+              >
             </div>
           </div>
-          <div class="col">
+          <div class="col mt-3">
             <RouterLink
               class="btn btn-secondary"
               :to="'/enderecos/cadastro/' + id"

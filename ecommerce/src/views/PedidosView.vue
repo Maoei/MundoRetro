@@ -94,9 +94,6 @@ function trocaSolicitada(produto) {
               <option value="TROCA REALIZADA">TROCA REALIZADA</option>
               <option value="TROCA RECUSADA">TROCA RECUSADA</option>
             </select>
-            <button class="btn btn-outline-success" type="submit">
-              Search
-            </button>
           </form>
         </div>
       </div>

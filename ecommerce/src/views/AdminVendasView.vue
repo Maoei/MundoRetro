@@ -4,6 +4,7 @@ import { ref, onMounted, reactive } from 'vue';
 const checkoutProdutosData = reactive({
   name: '',
   produtos: [],
+  statusPedidos: 'TODOS',
 });
 
 let id = '';
@@ -17,7 +18,8 @@ onMounted(async () => {
 });
 
 async function getCheckoutProdutos() {
-  fetch('http://localhost:3001/getCheckoutProdutos', {
+  let status = checkoutProdutosData.statusPedidos;
+  fetch('http://localhost:3001/getCheckoutProdutos/' + status, {
     method: 'GET',
   })
     .then((response) => response.json())
@@ -41,14 +43,38 @@ async function getCheckoutProdutos() {
           <h2 class="text-center">Lista de Vendas</h2>
         </div>
       </div>
-
+      <div class="row">
+        <div class="col">
+          <form class="d-flex" role="search">
+            <select
+              class="form-control me-2"
+              type="search"
+              placeholder="Search"
+              aria-label="Search"
+              v-model="checkoutProdutosData.statusPedidos"
+              v-on:change="getCheckoutProdutos()"
+            >
+              <option value="TODOS">TODOS</option>
+              <option value="EM PROCESSAMENTO">EM PROCESSAMENTO</option>
+              <option value="PEDIDO APROVADO">PEDIDO APROVADO</option>
+              <option value="PAGAMENTO RECUSADO">PAGAMENTO RECUSADO</option>
+              <option value="EM TRÂNSITO">EM TRÂNSITO</option>
+              <option value="ENTREGUE">ENTREGUE</option>
+              <option value="TROCA SOLICITADA">TROCA SOLICITADA</option>
+              <option value="TROCA APROVADA">TROCA APROVADA</option>
+              <option value="TROCA REALIZADA">TROCA REALIZADA</option>
+              <option value="TROCA RECUSADA">TROCA RECUSADA</option>
+            </select>
+          </form>
+        </div>
+      </div>
       <div class="row">
         <div
           class="col"
           v-for="produto in checkoutProdutosData.produtos"
           :key="produto.idCheckOut"
         >
-          <div class="card" style="width: 18rem">
+          <div class="card" style="width: 18rem; height: 40rem">
             <img
               :src="'../../src/assets/images/' + produto.idProduto + '.png'"
               class="card-img-top"
@@ -56,7 +82,7 @@ async function getCheckoutProdutos() {
             />
             <div class="card-body">
               <h5 class="card-title">
-                <RouterLink :to="'/admin/produto/' + produto.idCheckOut">{{
+                <RouterLink :to="'/admin/pedidos/' + produto.idCheckOut">{{
                   produto.titulo
                 }}</RouterLink>
               </h5>

@@ -57,37 +57,66 @@ function submitForm() {
   addCartao({ ...cartoesData }); // Envia os dados do formulário para a função addCartao
 }
 </script>
-
 <template v-if="exibir">
   <main>
-    <h1>Cadastro de Cartões</h1>
-    <form @submit.prevent="submitForm">
-      <div>
-        <label for="numeroCartao">Número do Cartão: </label>
-        <input
-          type="text"
-          id="numeroCartao"
-          v-model="cartoesData.numeroCartao"
-        />
+    <div class="container">
+      <div class="row">
+        <div class="col">
+          <h1>Cadastro de Cartões</h1>
+        </div>
       </div>
-      <div>
-        <label for="nomeCartao">Nome no Cartão: </label>
-        <input type="text" id="nomeCartao" v-model="cartoesData.nomeCartao" />
+      <div class="row">
+        <div class="col">
+          <form class="row g-3" @submit.prevent="submitForm">
+            <div class="col-md-7">
+              <label for="numeroCartao">Número do Cartão: </label>
+              <input
+                type="text"
+                id="numeroCartao"
+                v-model="cartoesData.numeroCartao"
+                class="form-control"
+              />
+            </div>
+            <div class="col-md-7">
+              <label for="nomeCartao">Nome no Cartão: </label>
+              <input
+                type="text"
+                id="nomeCartao"
+                v-model="cartoesData.nomeCartao"
+                class="form-control"
+              />
+            </div>
+            <div class="row">
+              <div class="col-md-3">
+                <label for="validade">Validade: </label>
+                <input
+                  type="text"
+                  id="validade"
+                  v-model="cartoesData.validade"
+                  class="form-control"
+                />
+              </div>
+              <div class="col-md-3">
+                <label for="codigoSeguranca">Código de Segurança: </label>
+                <input
+                  type="text"
+                  id="codigoSeguranca"
+                  v-model="cartoesData.codigoSeguranca"
+                  class="form-control"
+                />
+              </div>
+            </div>
+            <div class="row mt-3">
+              <div class="col">
+                <button type="submit" class="btn btn-secondary">
+                  Cadastrar Cartão
+                </button>
+              </div>
+            </div>
+          </form>
+        </div>
       </div>
-      <div>
-        <label for="validade">Validade: </label>
-        <input type="text" id="validade" v-model="cartoesData.validade" />
-      </div>
-      <div>
-        <label for="codigoSeguranca">Código de Segurança: </label>
-        <input
-          type="text"
-          id="codigoSeguranca"
-          v-model="cartoesData.codigoSeguranca"
-        />
-      </div>
-      <button type="submit">Cadastrar Cartão</button>
-    </form>
+    </div>
   </main>
 </template>
 

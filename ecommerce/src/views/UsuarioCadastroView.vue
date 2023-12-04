@@ -75,49 +75,104 @@ function mascararCPFCNPJ(value) {
   return value;
 }
 </script>
-
 <template v-if="exibir">
   <main>
     <h1>Cadastro de Usuários</h1>
     <form @submit.prevent="submitForm">
-      <div>
-        <label for="nome">Nome: </label>
-        <input type="text" id="nome" v-model="userData.nome" />
+      <div class="row">
+        <div class="col">
+          <label for="nome">Nome: </label>
+          <input
+            type="text"
+            id="nome"
+            v-model="userData.nome"
+            class="form-control"
+          />
+        </div>
+        <div class="col">
+          <label for="email">Email: </label>
+          <input
+            type="text"
+            id="email"
+            v-model="userData.email"
+            class="form-control"
+          />
+        </div>
       </div>
-      <div>
-        <label for="email">Email: </label>
-        <input type="text" id="email" v-model="userData.email" />
+      <div class="row">
+        <div class="col">
+          <label for="cpfcnpj">CPF/CNPJ: </label>
+          <input
+            type="text"
+            id="cpfcnpj"
+            v-model="userData.cpfcnpj"
+            @input="userData.cpfcnpj = mascararCPFCNPJ(userData.cpfcnpj)"
+            class="form-control"
+          />
+        </div>
+        <div class="col">
+          <label for="dtnascimento">Data de Nascimento: </label>
+          <input
+            type="date"
+            id="dtnascimento"
+            v-model="userData.dtnascimento"
+            class="form-control"
+          />
+        </div>
       </div>
-      <div>
-        <label for="cpfcnpj">CPF/CNPJ: </label>
-        <input
-          type="text"
-          id="cpfcnpj"
-          v-model="userData.cpfcnpj"
-          @input="userData.cpfcnpj = mascararCPFCNPJ(userData.cpfcnpj)"
-        />
+      <div class="row">
+        <div class="col">
+          <label for="genero">Gênero: </label>
+          <select
+            class="form-select"
+            aria-label="Default select example"
+            name=""
+            id="genero"
+            v-model="userData.genero"
+          >
+            <option value="Feminino">Feminino</option>
+            <option value="Masculino">Masculino</option>
+            <option value="Outro">Outro</option>
+          </select>
+        </div>
+        <div class="col">
+          <label for="telefone">Telefone: </label>
+          <input
+            type="text"
+            id="telefone"
+            v-model="userData.telefone"
+            class="form-control"
+          />
+        </div>
       </div>
-      <div>
-        <label for="dtnascimento">Data de Nascimento: </label>
-        <input type="date" id="dtnascimento" v-model="userData.dtnascimento" />
+      <div class="row">
+        <div class="col">
+          <label for="usr">Usuário: </label>
+          <input
+            type="text"
+            id="usr"
+            v-model="userData.usr"
+            class="form-control"
+          />
+        </div>
+        <div class="col">
+          <label for="senha">Senha: </label>
+          <input
+            type="password"
+            id="senha"
+            v-model="userData.senha"
+            class="form-control"
+          />
+        </div>
       </div>
-      <div>
-        <label for="usr">Usuário: </label>
-        <input type="text" id="usr" v-model="userData.usr" />
+
+      <div class="row mt-3">
+        <div class="col">
+          <button type="submit" class="btn btn-secondary">
+            Cadastrar Usuário
+          </button>
+        </div>
       </div>
-      <div>
-        <label for="senha">Senha: </label>
-        <input type="password" id="senha" v-model="userData.senha" />
-      </div>
-      <div>
-        <label for="genero">Gênero: </label>
-        <input type="text" id="genero" v-model="userData.genero" />
-      </div>
-      <div>
-        <label for="telefone">Telefone: </label>
-        <input type="text" id="telefone" v-model="userData.telefone" />
-      </div>
-      <button type="submit">Cadastrar Usuário</button>
     </form>
   </main>
 </template>

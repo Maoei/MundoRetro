@@ -77,6 +77,8 @@ CREATE TABLE checkout (
     ALTER TABLE checkout ADD COLUMN valorDesconto DECIMAL(10, 2)
     ALTER TABLE checkout ADD COLUMN valorFrete DECIMAL(10, 2)
     ALTER TABLE checkout ADD COLUMN observacao VARCHAR(300)
+    ALTER TABLE checkout ADD COLUMN idEnderecoCobranca INT
+
 );
 
 CREATE TABLE checkoutPagamentos (

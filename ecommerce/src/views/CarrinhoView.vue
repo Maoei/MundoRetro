@@ -115,13 +115,17 @@ function redirect() {
                       >R$ {{ produto.valor }}</a
                     >
                     <input
+                      class="form-control mb-3 col-md-4 mt-3"
                       type="number"
                       min="1"
                       :max="produto.produto_qtd"
                       v-model="produto.qtd"
                       v-on:change="addCarrinho(produto.produto_id, produto.qtd)"
                     />
-                    <button v-on:click="deleteUmCarrinho(produto.id)">
+                    <button
+                      class="btn btn-danger"
+                      v-on:click="deleteUmCarrinho(produto.id)"
+                    >
                       Excluir
                     </button>
                   </div>

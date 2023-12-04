@@ -1,5 +1,6 @@
 <script setup>
 import { ref, onMounted, reactive } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 
 const enderecoData = reactive({
   name: '',
@@ -8,33 +9,46 @@ const enderecoData = reactive({
 
 let id = '';
 let exibir = false;
-const enderecoDiferente = ref();
+const route = useRoute();
 
 onMounted(async () => {
-  id = localStorage.id; // Captura o ID do Local Storage
-  console.log('id ', id);
-  getEnderecos();
-  console.log('enderecoDiferente ' + enderecoDiferente);
+  console.log(route.params.id);
+  id = route.params.id;
+
+  await getEnderecosId();
 });
 
-async function getEnderecos() {
-  fetch('http://localhost:3001/getEnderecos/' + id, {
+async function getEnderecosId() {
+  let idEndereco = id;
+  console.log('idEndereco ' + idEndereco);
+
+  fetch('http://localhost:3001/getEnderecosId/' + idEndereco, {
     method: 'GET',
   })
     .then((response) => response.json())
     .then((data) => {
       console.log('Resposta do backend:', data);
       enderecoData.enderecos = data;
+      console.log('endereco ' + enderecoData.enderecos.endereco);
+      console.log('cidade ' + enderecoData.enderecos.cidade);
       exibir = true;
     })
     .catch((error) => {
       console.error('Erro ao enviar dados:', error);
     });
 }
-async function addEndereco(data) {
+
+function submitForm() {
+  console.log('submitForm');
+  //updateEndereco({ ...enderecoData }); // Envia os dados do formulário para a função addEndereco
+}
+
+async function updateEndereco(data) {
+  console.log('updateEndereco');
+  return 0;
   try {
-    const response = await fetch(`http://localhost:3001/addEndereco/${id}`, {
-      method: 'POST',
+    const response = await fetch(`http://localhost:3001/updateUser/${id}`, {
+      method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
       },
@@ -44,22 +58,15 @@ async function addEndereco(data) {
     if (response.ok) {
       const responseData = await response.json();
       console.log('Resposta do backend:', responseData);
-      enderecoData.enderecos = responseData;
-      getEnderecos();
+      clienteData.clientes = responseData;
+      getEnderecosId();
+      router.push('/dados-pessoais');
     } else {
       throw new Error('Erro ao enviar dados');
     }
   } catch (error) {
     console.error('Erro ao enviar dados:', error);
   }
-}
-
-function submitForm() {
-  addEndereco({ ...enderecoData }); // Envia os dados do formulário para a função addEndereco
-}
-
-function logEnderecoDiferente() {
-  console.log('enderecoDiferente ' + enderecoDiferente);
 }
 </script>
 
@@ -80,7 +87,7 @@ function logEnderecoDiferente() {
                 type="text"
                 id="endereco"
                 class="form-control"
-                v-model="enderecoData.endereco"
+                v-model="enderecoData.enderecos.endereco"
               />
             </div>
             <div class="col-md-6">
@@ -89,7 +96,7 @@ function logEnderecoDiferente() {
                 type="text"
                 id="complemento"
                 class="form-control"
-                v-model="enderecoData.complemento"
+                v-model="enderecoData.enderecos.complemento"
               />
             </div>
             <div class="col-md-6">
@@ -98,7 +105,7 @@ function logEnderecoDiferente() {
                 type="text"
                 id="bairro"
                 class="form-control"
-                v-model="enderecoData.bairro"
+                v-model="enderecoData.enderecos.bairro"
               />
             </div>
             <div class="col-md-6">
@@ -107,7 +114,7 @@ function logEnderecoDiferente() {
                 type="text"
                 id="numero"
                 class="form-control"
-                v-model="enderecoData.numero"
+                v-model="enderecoData.enderecos.numero"
               />
             </div>
             <div class="col-md-6">
@@ -116,7 +123,7 @@ function logEnderecoDiferente() {
                 type="text"
                 id="cidade"
                 class="form-control"
-                v-model="enderecoData.cidade"
+                v-model="enderecoData.enderecos.cidade"
               />
             </div>
             <div class="col-md-6">
@@ -125,7 +132,7 @@ function logEnderecoDiferente() {
                 type="text"
                 id="cep"
                 class="form-control"
-                v-model="enderecoData.cep"
+                v-model="enderecoData.enderecos.cep"
               />
             </div>
             <div class="col-md-6">
@@ -134,14 +141,15 @@ function logEnderecoDiferente() {
                 type="text"
                 id="estado"
                 class="form-control"
-                v-model="enderecoData.estado"
+                v-model="enderecoData.enderecos.estado"
               />
             </div>
 
             <div class="col-12">
-              <button type="submit" class="btn btn-secondary">
-                Cadastrar Endereço
+              <button class="btn btn-secondary" type="submit">
+                <RouterLink :to="'/enderecos'">Cancelar</RouterLink>
               </button>
+              <button type="submit" class="btn btn-secondary">Salvar</button>
             </div>
           </form>
         </div>

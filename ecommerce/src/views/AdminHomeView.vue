@@ -1,9 +1,10 @@
 <script setup>
 import { ref, onMounted, reactive } from 'vue';
 
-const cartoesData = reactive({
+const checkoutProdutosData = reactive({
   name: '',
-  cartoes: [],
+  produtos: [],
+  statusPedidos: 'TODOS',
 });
 
 let id = '';
@@ -15,9 +16,14 @@ onMounted(async () => {
 });
 </script>
 
-<template>
+<template v-if="exibir">
   <main>
     <div class="container">
+      <div class="row">
+        <div class="col">
+          <h1>Admin</h1>
+        </div>
+      </div>
       <div class="accordion" id="accordionExample">
         <div class="accordion-item">
           <h2 class="accordion-header" id="headingOne">
@@ -29,7 +35,7 @@ onMounted(async () => {
               aria-expanded="true"
               aria-controls="collapseOne"
             >
-              Dados da Conta
+              Usuários
             </button>
           </h2>
           <div
@@ -39,18 +45,8 @@ onMounted(async () => {
             data-bs-parent="#accordionExample"
           >
             <div class="accordion-body">
-              <router-link to="/dados-pessoais">
-                <div>Dados Pessoais</div>
-              </router-link>
-            </div>
-            <div class="accordion-body">
-              <router-link to="/enderecos">
-                <div>Dados de Endereço</div>
-              </router-link>
-            </div>
-            <div class="accordion-body">
-              <router-link to="/cartoes">
-                <div>Dados de Cartões</div>
+              <router-link to="/admin/usuarios">
+                <div>Lista de Usuários</div>
               </router-link>
             </div>
           </div>
@@ -65,7 +61,7 @@ onMounted(async () => {
               aria-expanded="false"
               aria-controls="collapseTwo"
             >
-              Meus Pedidos
+              Pedidos
             </button>
           </h2>
           <div
@@ -75,7 +71,7 @@ onMounted(async () => {
             data-bs-parent="#accordionExample"
           >
             <div class="accordion-body">
-              <router-link to="/pedidos">
+              <router-link to="/admin/pedidos">
                 <div>Lista de Pedidos</div>
               </router-link>
             </div>
@@ -91,7 +87,7 @@ onMounted(async () => {
               aria-expanded="false"
               aria-controls="collapseThree"
             >
-              Meus Cupons
+              Produtos
             </button>
           </h2>
           <div
@@ -101,10 +97,7 @@ onMounted(async () => {
             data-bs-parent="#accordionExample"
           >
             <div class="accordion-body">
-              <router-link to="/cupons-disponiveis"> Disponíveis</router-link>
-            </div>
-            <div class="accordion-body">
-              <router-link to="/cupons-expirados"> Expirados </router-link>
+              <router-link to="/admin/produtos"> Lista de Produtos</router-link>
             </div>
           </div>
         </div>

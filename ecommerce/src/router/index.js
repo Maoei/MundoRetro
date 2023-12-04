@@ -51,6 +51,12 @@ const router = createRouter({
       props: true,
     },
     {
+      path: '/enderecos/editar/:id',
+      name: 'enderecosEditar',
+      component: () => import('../views/EnderecosEditarView.vue'),
+      props: true,
+    },
+    {
       path: '/cartoes',
       name: 'cartoes',
       component: () => import('../views/CartoesView.vue'),
@@ -71,13 +77,31 @@ const router = createRouter({
     {
       path: '/admin',
       name: 'admin',
-      component: () => import('../views/AdminProdutoView.vue'),
+      component: () => import('../views/AdminHomeView.vue'),
       props: true,
     },
     {
-      path: '/admin/produto/:id',
-      name: 'adminProduto',
-      component: () => import('../views/AdminProdutoDetalheView.vue'),
+      path: '/admin/pedidos',
+      name: 'adminPedidos',
+      component: () => import('../views/AdminVendasView.vue'),
+      props: true,
+    },
+    {
+      path: '/admin/pedidos/:id',
+      name: 'adminPedidoDetalhe',
+      component: () => import('../views/AdminVendasDetalheView.vue'),
+      props: true,
+    },
+    {
+      path: '/admin/usuarios',
+      name: 'adminUsuarios',
+      component: () => import('../views/AdminUsuariosView.vue'),
+      props: true,
+    },
+    {
+      path: '/admin/produtos',
+      name: 'adminProdutos',
+      component: () => import('../views/AdminProdutosView.vue'),
       props: true,
     },
     {
@@ -108,6 +132,18 @@ const router = createRouter({
       path: '/grafico',
       name: 'grafico',
       component: () => import('../views/ChartView.vue'),
+      props: true,
+    },
+    {
+      path: '/dados-pessoais',
+      name: 'dadosPessoais',
+      component: () => import('../views/DadosPessoais.vue'),
+      props: true,
+    },
+    {
+      path: '/dados-pessoais/editar',
+      name: 'dadosPessoaisEditar',
+      component: () => import('../views/DadosPessoaisEditar.vue'),
       props: true,
     },
   ],
