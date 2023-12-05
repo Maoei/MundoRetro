@@ -36,6 +36,14 @@ async function getCartoes() {
 <template v-if="exibir">
   <main>
     <div class="container">
+      <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item"><a :href="'/conta/' + id">Conta</a></li>
+          <li class="breadcrumb-item active" aria-current="page">
+            Lista de Cartões
+          </li>
+        </ol>
+      </nav>
       <div class="row">
         <div class="col">
           <h1>Lista de Cartões</h1>

@@ -102,12 +102,14 @@ async function addCarrinho(id) {
                       />
                     </div>
                   </form>
-                  <button
-                    class="btn btn-secondary"
-                    v-on:click="addCarrinho(produtoData.produtos.id)"
-                  >
-                    Comprar
-                  </button>
+                  <div class="col mt-2">
+                    <button
+                      class="btn btn-success"
+                      v-on:click="addCarrinho(produtoData.produtos.id)"
+                    >
+                      Adicionar ao Carrinho
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>

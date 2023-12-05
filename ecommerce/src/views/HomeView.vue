@@ -64,51 +64,45 @@ async function addCarrinho(id) {
 
 <template>
   <main>
-    <div class="container">
-      <div class="row">
-        <div class="col">
-          <div
-            id="carouselExampleSlidesOnly"
-            class="carousel slide"
-            data-bs-ride="carousel"
-          >
-            <div class="carousel-inner">
-              <div class="carousel-item active" style="height: 30rem">
-                <img
-                  src="../../src/assets/images/home2.jpg"
-                  class="d-block w-100"
-                  alt="..."
-                />
+    <div class="content">
+      <div class="container">
+        <div class="row">
+          <div class="col">
+            <div
+              id="carouselExampleSlidesOnly"
+              class="carousel slide"
+              data-bs-ride="carousel"
+            >
+              <div class="carousel-inner">
+                <div class="carousel-item active" style="height: 30rem">
+                  <img
+                    src="../../src/assets/images/home2.jpg"
+                    class="d-block w-100"
+                    alt="..."
+                  />
+                </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
-      <div class="row mt-2">
-        <div class="col mt-2" v-for="produto in produtoData.produtos">
-          <div class="card" style="width: 18rem; height: 35rem">
-            <img
-              :src="'../src/assets/images/' + produto.id + '.png'"
-              class="card-img-top image-fluid"
-              alt="..."
-            />
-            <div class="card-body">
-              <h5 class="card-title">
-                <RouterLink :to="'/produtos/detalhe/' + produto.id">{{
-                  produto.titulo
-                }}</RouterLink>
-              </h5>
-              <p class="card-text">{{ produto.descrProduto }}</p>
-              <a href="#" class="btn btn-secondary" style="margin-right: 2px"
-                >R$ {{ produto.valor }}</a
-              >
-              <div class="col mt-2">
-                <button
-                  class="btn btn-success"
-                  v-on:click="addCarrinho(produtoData.produtos.id)"
+        <div class="row mt-2 mb-2">
+          <div class="col mt-2" v-for="produto in produtoData.produtos">
+            <div class="card" style="width: 18rem; height: 35rem">
+              <img
+                :src="'../src/assets/images/' + produto.id + '.png'"
+                class="card-img-top image-fluid"
+                alt="..."
+              />
+              <div class="card-body">
+                <h5 class="card-title">
+                  <RouterLink :to="'/produtos/detalhe/' + produto.id">{{
+                    produto.titulo
+                  }}</RouterLink>
+                </h5>
+                <p class="card-text">{{ produto.descrProduto }}</p>
+                <a href="#" class="btn btn-secondary" style="margin-right: 2px"
+                  >R$ {{ produto.valor }}</a
                 >
-                  Adicionar ao Carrinho
-                </button>
               </div>
             </div>
           </div>
@@ -117,3 +111,5 @@ async function addCarrinho(id) {
     </div>
   </main>
 </template>
+
+<style></style>

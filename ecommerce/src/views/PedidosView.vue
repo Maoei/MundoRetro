@@ -32,41 +32,20 @@ async function getCheckoutProdutosId() {
       console.error('Erro ao enviar dados:', error);
     });
 }
-function trocaSolicitada(produto) {
-  console.log('produto ' + produto);
-  let status = 'TROCA SOLICITADA';
-
-  const requestBody = {
-    idCheckOut: produto.idCheckOut,
-    idCliente: id,
-    idProduto: produto.idProduto,
-    status: status,
-  };
-  console.log('status ' + requestBody.status);
-  console.log('idCheckOut ' + requestBody.idCheckOut);
-  console.log('idCliente ' + requestBody.idCliente);
-  console.log('idProduto ' + requestBody.idProduto);
-
-  fetch(`http://localhost:3001/trocaSolicitada`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(requestBody),
-  })
-    .then((response) => response.json())
-    .then((data) => {
-      console.log('Resposta do backend:', data);
-    })
-    .catch((error) => {
-      console.error('Erro ao enviar dados:', error);
-    });
-}
 </script>
 
 <template v-if="exibir">
   <main>
     <div class="container">
+      <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item"><a :href="'/conta/' + id">Conta</a></li>
+          <li class="breadcrumb-item active" aria-current="page">
+            Lista de Pedidos
+          </li>
+        </ol>
+      </nav>
+
       <div class="row">
         <div class="col">
           <h2 class="text-center">Lista de Pedidos</h2>

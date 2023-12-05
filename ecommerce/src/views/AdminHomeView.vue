@@ -19,6 +19,11 @@ onMounted(async () => {
 <template v-if="exibir">
   <main>
     <div class="container">
+      <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item active" aria-current="page">Admin</li>
+        </ol>
+      </nav>
       <div class="row">
         <div class="col">
           <h1>Admin</h1>
@@ -73,6 +78,11 @@ onMounted(async () => {
             <div class="accordion-body">
               <router-link to="/admin/pedidos">
                 <div>Lista de Pedidos</div>
+              </router-link>
+            </div>
+            <div class="accordion-body">
+              <router-link to="/grafico">
+                <div>Gráfico de Vendas</div>
               </router-link>
             </div>
           </div>

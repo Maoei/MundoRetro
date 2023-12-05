@@ -1,4 +1,5 @@
-CREATE DATABASE ecommerce;
+create database dbApiMundoRetro;
+use dbApiMundoRetro;
 
 CREATE TABLE clientes (
     id INT AUTO_INCREMENT PRIMARY KEY,

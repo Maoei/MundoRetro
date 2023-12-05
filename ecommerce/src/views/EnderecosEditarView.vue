@@ -68,14 +68,35 @@ async function updateEndereco(data) {
     console.error('Erro ao enviar dados:', error);
   }
 }
+
+function formatarCEP() {
+  enderecoData.enderecos.cep = enderecoData.enderecos.cep.replace(/\D/g, '');
+
+  if (enderecoData.cep.length >= 8) {
+    enderecoData.enderecos.cep = enderecoData.enderecos.cep.replace(
+      /^(\d{5})(\d{3})$/,
+      '$1-$2'
+    );
+  }
+}
 </script>
 
 <template v-if="exibir">
   <main>
     <div class="container">
+      <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item"><a :href="'/conta/' + id">Conta</a></li>
+          <li class="breadcrumb-item">
+            <a :href="'/enderecos'">Lista de Endereços</a>
+          </li>
+
+          <li class="breadcrumb-item active" aria-current="page">Edição</li>
+        </ol>
+      </nav>
       <div class="row">
         <div class="col">
-          <h1>ID Endereço: {{ enderecoData.enderecos.id }}</h1>
+          <h1>ID Endereço: {{ id }}</h1>
         </div>
       </div>
       <div class="row">
@@ -133,6 +154,8 @@ async function updateEndereco(data) {
                 id="cep"
                 class="form-control"
                 v-model="enderecoData.enderecos.cep"
+                maxlength="8"
+                @input="formatarCEP"
               />
             </div>
             <div class="col-md-6">

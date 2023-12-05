@@ -215,6 +215,8 @@ function validarCupom() {
         'checkoutData.valorPago ' + checkoutData.valorPago - Number(data.valor)
       );
       if (data.valor > 0) {
+        checkoutData.valorDesconto = Number(data.valor)
+      console.log('valorDesconto ' + checkoutData.valorDesconto)
         checkoutData.valorPago = checkoutData.valorPago - Number(data.valor);
       }
 
@@ -269,12 +271,20 @@ function alertaValorMin() {
               >R$ {{ checkoutData.valorFrete.toFixed(2) }}</a
             >
           </div>
+
+          <div class="col">
+            <h3>Valor do Desconto</h3>
+            <a href="#" class="btn btn-secondary" style="margin-right: 2px"
+              >R$ {{ checkoutData.valorDesconto.toFixed(2) }}</a
+            >
+          </div>
+
           <div class="col">
             <h3>Total a Pagar</h3>
             <a href="#" class="btn btn-secondary" style="margin-right: 2px"
               >R$
               {{
-                (checkoutData.valorPago + checkoutData.valorFrete).toFixed(2)
+                (checkoutData.valorPago + checkoutData.valorFrete - checkoutData.valorDesconto).toFixed(2)
               }}</a
             >
           </div>
@@ -337,7 +347,7 @@ function alertaValorMin() {
       <div class="row">
         <div class="col-md-3">
           <select
-            class="form-select"
+            class="form-select border-dark"
             aria-label="Default select example"
             name=""
             id="endereco"
@@ -359,7 +369,7 @@ function alertaValorMin() {
       <div class="row">
         <div class="col-md-3">
           <select
-            class="form-select"
+            class="form-select border-dark"
             aria-label="Default select example"
             name=""
             id="enderecoCobranca"
@@ -393,7 +403,7 @@ function alertaValorMin() {
         <div class="row">
           <div class="col-md-3">
             <select
-              class="form-select"
+              class="form-select border-dark"
               aria-label="Default select example"
               name=""
               id="cartao_0"
@@ -410,13 +420,13 @@ function alertaValorMin() {
             <h2>Valor a Pagar no Cartão</h2>
             <div class="col-md-1">
               <input
-                class="form-control"
+                class="form-control border-dark"
                 step="0.01"
                 type="number"
                 v-on:change="alertaValorMin(checkoutData.cartoes[0].valor)"
                 v-model="checkoutData.cartoes[0].valor"
                 min="10"
-                :max="carrinhoData.valorTotal + checkoutData.valorFrete"
+                :max="(checkoutData.valorPago + checkoutData.valorFrete - checkoutData.valorDesconto).toFixed(2)"
               />
             </div>
           </div>
@@ -449,7 +459,7 @@ function alertaValorMin() {
             <div class="row">
               <div class="col-md-3">
                 <select
-                class="form-select"
+                class="form-select border-dark"
                   :name="'cartao_' + val"
                   :id="'cartao_' + val"
                   v-model="checkoutData.cartoes[val].id"
@@ -467,12 +477,12 @@ function alertaValorMin() {
                 <h2>Valor a Pagar no Cartão</h2>
                 <div class="col-md-1">
                   <input
-                  class="form-control"
+                  class="form-control border-dark"
                 type="number"
                 step="0.01"
                 v-model="checkoutData.cartoes[val].valor"
                 min="10"
-                :max="carrinhoData.valorTotal - checkoutData.cartoes[0].valor"
+                :max="((checkoutData.valorPago + checkoutData.valorFrete - checkoutData.valorDesconto).toFixed(2) - checkoutData.cartoes[0].valor)"
               />
                 </div>
               </div>

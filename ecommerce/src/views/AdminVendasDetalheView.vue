@@ -152,7 +152,7 @@ function trocarStatus(produto) {
                       <button
                         class="btn btn-secondary"
                         type="submit"
-                        @click="trocarStatus(checkoutProdutosData.produtos[0])"
+                        @click="trocarStatus(produto)"
                       >
                         Salvar
                         <!--<RouterLink :to="'/admin'">Salvar</RouterLink> -->

@@ -61,6 +61,14 @@ function submitForm() {
 function logEnderecoDiferente() {
   console.log('enderecoDiferente ' + enderecoDiferente);
 }
+
+function formatarCEP() {
+  enderecoData.cep = enderecoData.cep.replace(/\D/g, '');
+
+  if (enderecoData.cep.length >= 8) {
+    enderecoData.cep = enderecoData.cep.replace(/^(\d{5})(\d{3})$/, '$1-$2');
+  }
+}
 </script>
 
 <template v-if="exibir">
@@ -126,6 +134,8 @@ function logEnderecoDiferente() {
                 id="cep"
                 class="form-control"
                 v-model="enderecoData.cep"
+                maxlength="8"
+                @input="formatarCEP"
               />
             </div>
             <div class="col-md-6">

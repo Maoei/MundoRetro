@@ -35,6 +35,15 @@ async function getCupons() {
 <template v-if="exibir">
   <main>
     <div class="container">
+      <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item"><a :href="'/conta/' + id">Conta</a></li>
+
+          <li class="breadcrumb-item active" aria-current="page">
+            Lista de Cupons Expirados
+          </li>
+        </ol>
+      </nav>
       <div class="row">
         <div class="col">
           <h3>Lista de Cupons</h3>

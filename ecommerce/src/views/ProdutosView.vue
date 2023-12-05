@@ -34,7 +34,7 @@ async function getProdutos() {
 
 <template v-if="exibir">
   <main>
-    <div class="container">
+    <div class="container mb-5">
       <div class="row">
         <div class="col">
           <h1 class="text-center">Produtos</h1>
@@ -64,7 +64,7 @@ async function getProdutos() {
         </div>
       </div>
 
-      <div class="row mt-2">
+      <div class="row mt-2 m-2">
         <div class="col mt-2" v-for="produto in produtoData.produtos">
           <div class="card" style="width: 18rem; height: 30rem">
             <img

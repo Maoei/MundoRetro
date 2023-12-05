@@ -31,6 +31,7 @@ function getPedidosDetalhe() {
       });
       console.log('Resposta do backend:', data);
       checkoutProdutosData.produtos = data;
+      console.log('idCheckOutProduto ' + checkoutProdutosData.produtos.id);
       exibir = true;
     })
     .catch((error) => {
@@ -44,6 +45,7 @@ function trocaSolicitada(produto) {
 
   const requestBody = {
     idCheckOut: produto.idCheckOut,
+    idCheckOutProduto: produto.id,
     idCliente: id,
     idProduto: produto.idProduto,
     status: status,
@@ -52,6 +54,7 @@ function trocaSolicitada(produto) {
   console.log('idCheckOut ' + requestBody.idCheckOut);
   console.log('idCliente ' + requestBody.idCliente);
   console.log('idProduto ' + requestBody.idProduto);
+  console.log('idCheckOutProduto ' + requestBody.idCheckOutProduto);
 
   fetch(`http://localhost:3001/trocaSolicitada`, {
     method: 'POST',
@@ -73,9 +76,22 @@ function trocaSolicitada(produto) {
 <template v-if="exibir">
   <main>
     <div class="container">
+      <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item"><a :href="'/conta/' + id">Conta</a></li>
+          <li class="breadcrumb-item">
+            <a :href="'/pedidos'">Detalhes do Pedido</a>
+          </li>
+
+          <li class="breadcrumb-item active" aria-current="page">
+            Lista de Pedidos
+          </li>
+        </ol>
+      </nav>
+
       <div class="row">
         <div class="col">
-          <h2 class="text-center">Lista de Compras</h2>
+          <h2 class="text-center">Detalhes do Pedido</h2>
         </div>
       </div>
 

@@ -5,6 +5,7 @@ import { useRoute, useRouter } from 'vue-router';
 const cartoesData = reactive({
   name: '',
   cartoes: [],
+  idBandeira: '1',
 });
 
 let idCartao = '';
@@ -38,10 +39,25 @@ async function getCartoesId() {
 function submitForm() {
   //updateCartao({ ...cartoesData }); // Envia os dados do formulário para a função updateCartao
 }
+
+function definirBandeira() {
+  cartoesData.idBandeira = cartoesData.numeroCartao.charAt(0);
+  console.log('idBandeira ' + cartoesData.idBandeira);
+}
 </script>
 <template v-if="exibir">
   <main>
     <div class="container">
+      <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item"><a :href="'/conta/' + id">Conta</a></li>
+          <li class="breadcrumb-item">
+            <a :href="'/cartoes'">Lista de Cartões</a>
+          </li>
+
+          <li class="breadcrumb-item active" aria-current="page">Edição</li>
+        </ol>
+      </nav>
       <div class="row">
         <div class="col">
           <h1>ID Cartão: {{ idCartao }}</h1>
@@ -57,6 +73,7 @@ function submitForm() {
                 id="numeroCartao"
                 v-model="cartoesData.cartoes.numeroCartao"
                 class="form-control"
+                @input="definirBandeira()"
               />
             </div>
             <div class="col-md-7">
@@ -85,6 +102,17 @@ function submitForm() {
                   id="codigoSeguranca"
                   v-model="cartoesData.cartoes.codigoSeguranca"
                   class="form-control"
+                />
+              </div>
+              <div class="float-end me-2 mt-3">
+                <img
+                  :src="
+                    '../../src/assets/images/cartoes/' +
+                    cartoesData.idBandeira +
+                    '.png'
+                  "
+                  height="30"
+                  width="30"
                 />
               </div>
             </div>

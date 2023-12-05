@@ -37,10 +37,19 @@ async function getCheckoutProdutos() {
 <template v-if="exibir">
   <main>
     <div class="container">
+      <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item"><a :href="'/admin'">Admin</a></li>
+
+          <li class="breadcrumb-item active" aria-current="page">
+            Lista de Pedidos
+          </li>
+        </ol>
+      </nav>
       <div class="row">
         <div class="col">
           <h1 class="text-center">Admin</h1>
-          <h2 class="text-center">Lista de Vendas</h2>
+          <h2 class="text-center">Lista de Pedidos</h2>
         </div>
       </div>
       <div class="row">
@@ -69,39 +78,37 @@ async function getCheckoutProdutos() {
         </div>
       </div>
       <div class="row">
-        <div
-          class="col mt-2"
-          v-for="produto in checkoutProdutosData.produtos"
-          :key="produto.idCheckOut"
-        >
-          <div class="card" style="width: 18rem; height: 40rem">
-            <img
-              :src="'../../src/assets/images/' + produto.idProduto + '.png'"
-              class="card-img-top"
-              alt="..."
-            />
-            <div class="card-body">
-              <h5 class="card-title">
-                <RouterLink :to="'/admin/pedidos/' + produto.idCheckOut">{{
-                  produto.titulo
-                }}</RouterLink>
-              </h5>
-              <p class="card-text">{{ produto.descrProduto }}</p>
-              <p class="card-text">
-                <strong>ID Pedido:</strong> {{ produto.idCheckOut }}
-              </p>
-              <p class="card-text">
-                <strong>ID Produto:</strong> {{ produto.idProduto }}
-              </p>
-              <p class="card-text">
-                <strong>Valor:</strong> {{ produto.valorProduto }}
-              </p>
-              <p class="card-text">
-                <strong>Gênero:</strong> {{ produto.genero }}
-              </p>
-              <a href="#" class="btn btn-secondary" style="margin-right: 2px">{{
-                produto.status
-              }}</a>
+        <div class="col mt-2">
+          <div
+            class="card mt-2"
+            v-for="produto in checkoutProdutosData.produtos"
+          >
+            <div
+              class="card-body d-flex align-items-center"
+              style="white-space: pre-line"
+            >
+              {{
+                'ID Pedido: ' +
+                produto.id +
+                '\n' +
+                `Valor: ` +
+                produto.valorFinal
+              }}
+              <div class="col">
+                <a
+                  href="#"
+                  class="btn btn-secondary ms-5"
+                  style="margin-right: 2px"
+                  >{{ produto.status }}</a
+                >
+              </div>
+              <div class="col">
+                <RouterLink
+                  class="btn btn-secondary float-end"
+                  :to="'/admin/pedidos/' + produto.id"
+                  >Detalhes do Pedido</RouterLink
+                >
+              </div>
             </div>
           </div>
         </div>

@@ -18,6 +18,12 @@ onMounted(async () => {
 <template>
   <main>
     <div class="container">
+      <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item active" aria-current="page">Conta</li>
+        </ol>
+      </nav>
+
       <div class="accordion" id="accordionExample">
         <div class="accordion-item">
           <h2 class="accordion-header" id="headingOne">
@@ -77,6 +83,11 @@ onMounted(async () => {
             <div class="accordion-body">
               <router-link to="/pedidos">
                 <div>Lista de Pedidos</div>
+              </router-link>
+            </div>
+            <div class="accordion-body">
+              <router-link to="/grafico">
+                <div>Gráfico de Vendas</div>
               </router-link>
             </div>
           </div>

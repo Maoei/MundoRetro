@@ -638,36 +638,40 @@ app.post('/checkout/finalizar', (req, res) => {
                     'Erro ao adicionar informações do cartão:',
                     pagamentosError
                   );
-                  res.status(500).json({
-                    error: 'Erro ao adicionar informações do cartão',
-                  });
+                  res
+                    .status(500)
+                    .json({ error: 'Erro ao adicionar informações do cartão' });
                 } else {
                   if (count == 0) {
                     count++;
                     // Adicionar produtos à tabela checkoutProdutos
-                    const insertCheckoutProdutosQuery =
-                      'INSERT INTO checkoutProdutos (idProduto, idCheckOut, valorProduto, status, qtd) VALUES (?, ?, ?, ?, ?)';
-                    connection.query(
-                      insertCheckoutProdutosQuery,
-                      [
-                        pagamento.idProduto,
-                        checkoutId,
-                        pagamento.valorProduto,
-                        status,
-                        pagamento.qtd,
-                      ],
-                      (produtosError, produtosResults, produtosFields) => {
-                        if (produtosError) {
-                          console.error(
-                            'Erro ao adicionar produto ao checkout:',
-                            produtosError
-                          );
-                          res.status(500).json({
-                            error: 'Erro ao adicionar produto ao checkout',
-                          });
+                    pagamentos.forEach((produto) => {
+                      const insertCheckoutProdutosQuery =
+                        'INSERT INTO checkoutProdutos (idProduto, idCheckOut, valorProduto, status, qtd) VALUES (?, ?, ?, ?, ?)';
+                      connection.query(
+                        insertCheckoutProdutosQuery,
+                        [
+                          produto.idProduto,
+                          checkoutId,
+                          produto.valorProduto,
+                          status,
+                          produto.qtd,
+                        ],
+                        (produtosError, produtosResults, produtosFields) => {
+                          if (produtosError) {
+                            console.error(
+                              'Erro ao adicionar produto ao checkout:',
+                              produtosError
+                            );
+                            res
+                              .status(500)
+                              .json({
+                                error: 'Erro ao adicionar produto ao checkout',
+                              });
+                          }
                         }
-                      }
-                    );
+                      );
+                    });
                   }
                 }
               }
@@ -732,18 +736,13 @@ app.get('/getCheckoutProdutos/:status', (req, res) => {
   let selectQuery = '';
 
   if (statusPedidos == 'TODOS') {
-    selectQuery = `SELECT checkoutProdutos.idProduto, checkoutProdutos.idCheckOut, checkoutProdutos.valorProduto, checkoutProdutos.status,
-    produtos.qtd, produtos.titulo, produtos.descrProduto, produtos.dtCompra, produtos.genero, produtos.valor 
-FROM checkoutProdutos 
-JOIN produtos ON produtos.id = checkoutProdutos.idProduto`;
+    selectQuery = `SELECT *
+    FROM checkout`;
   } else {
-    selectQuery = `SELECT checkoutProdutos.idProduto, checkoutProdutos.idCheckOut, checkoutProdutos.valorProduto, checkoutProdutos.status,
-    produtos.qtd, produtos.titulo, produtos.descrProduto, produtos.dtCompra, produtos.genero, produtos.valor 
-FROM checkoutProdutos 
-JOIN produtos ON produtos.id = checkoutProdutos.idProduto 
-WHERE checkoutProdutos.status = '${statusPedidos}'`;
+    selectQuery = `SELECT *
+    FROM checkout
+  WHERE checkout.status = '${statusPedidos}'`;
   }
-
   // Run the query
   connection.query(selectQuery, (error, results) => {
     if (error) {
@@ -1135,17 +1134,20 @@ app.get('/getPedidosDetalhe/:id', (req, res) => {
 // Rota para trocar o status para Solicitar Troca
 app.post('/trocaSolicitada', (req, res) => {
   const idCheckOut = req.body.idCheckOut;
+  const idCheckOutProduto = req.body.idCheckOutProduto;
   const novoStatus = req.body.status;
   const idProduto = req.body.idProduto;
 
+  console.log('trocaSolicitada ');
   console.log('idCheckOut ' + idCheckOut);
+  console.log('idCheckOutProduto ' + idCheckOutProduto);
   console.log('novoStatus ' + novoStatus);
 
   // Query to update the status in checkout table
   const updateCheckoutQuery = `UPDATE checkout SET status = ? WHERE id = ?`;
 
   // Query to update the status in checkoutProdutos table
-  const updateCheckoutProdutosQuery = `UPDATE checkoutProdutos SET status = ? WHERE idCheckOut = ? AND idProduto = ?`;
+  const updateCheckoutProdutosQuery = `UPDATE checkoutProdutos SET status = ? WHERE idCheckOut = ? AND idProduto = ? AND id = ?`;
 
   // Query to update the status in checkoutPagamentos table
   const updateCheckoutPagamentosQuery = `UPDATE checkoutPagamentos SET status = ? WHERE idCheckOut = ?`;
@@ -1170,7 +1172,7 @@ app.post('/trocaSolicitada', (req, res) => {
 
         connection.query(
           updateCheckoutProdutosQuery,
-          [novoStatus, idCheckOut, idProduto],
+          [novoStatus, idCheckOut, idProduto, idCheckOutProduto],
           (error, results) => {
             if (error) {
               connection.rollback(() => {
