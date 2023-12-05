@@ -525,6 +525,22 @@ app.get('/getCartoes/:id', (req, res) => {
   });
 });
 
+// Rota para listar cartões por idCartao
+app.get('/getCartoesId/:idCartao', (req, res) => {
+  const idCartao = req.params.idCartao;
+  console.log('idCartao ' + idCartao);
+
+  const query = 'SELECT * FROM cartoes WHERE id = ?';
+
+  connection.query(query, idCartao, (error, results, fields) => {
+    if (error) {
+      res.status(500).send('Erro ao buscar cartões por idCartao.');
+      throw error;
+    }
+    res.json(results);
+  });
+});
+
 //rota para adicionar novos cartões
 app.post('/addCartao/:id', (req, res) => {
   const idCliente = req.params.id;
@@ -765,7 +781,7 @@ app.get('/getCheckoutProdutosDetalhe/:id', (req, res) => {
   const idCheckout = req.params.id;
   console.log('idCheckout ' + idCheckout);
   // Query to fetch products for a specific idCheckout
-  const selectQuery = `SELECT checkoutProdutos.idProduto, checkoutProdutos.idCheckOut, checkoutProdutos.valorProduto, checkoutProdutos.status,
+  const selectQuery = `SELECT checkoutProdutos.id, checkoutProdutos.idProduto, checkoutProdutos.idCheckOut, checkoutProdutos.valorProduto, checkoutProdutos.status,
     produtos.qtd, produtos.titulo, produtos.descrProduto, produtos.dtCompra, produtos.genero, produtos.valor 
     FROM checkoutProdutos 
     JOIN produtos ON produtos.id = checkoutProdutos.idProduto
@@ -817,6 +833,7 @@ app.post('/validarCupom', (req, res) => {
 // Rota para trocar o status da compra pelo Admin
 app.post('/trocarStatus', (req, res) => {
   const idCheckOut = req.body.idCheckOut;
+  const idCheckOutProduto = req.body.idCheckOutProduto;
   const novoStatus = req.body.status;
   const obs = req.body.observacao;
   const idProduto = req.body.idProduto;
@@ -826,12 +843,13 @@ app.post('/trocarStatus', (req, res) => {
 
   console.log('idCheckOut ' + idCheckOut);
   console.log('novoStatus ' + novoStatus);
+  console.log('idCheckOutProduto ' + idCheckOutProduto);
 
   // Query to update the status in checkout table
   const updateCheckoutQuery = `UPDATE checkout SET status = ?, observacao = ? WHERE id = ?`;
 
   // Query to update the status in checkoutProdutos table
-  const updateCheckoutProdutosQuery = `UPDATE checkoutProdutos SET status = ? WHERE idCheckOut = ? AND idProduto = ?`;
+  const updateCheckoutProdutosQuery = `UPDATE checkoutProdutos SET status = ? WHERE idCheckOut = ? AND idProduto = ? AND id = ?`;
 
   if (novoStatus == 'TROCA APROVADA') {
     const selectProdutoQuery = `SELECT * FROM produtos WHERE id = ${idProduto} `;
@@ -902,7 +920,7 @@ app.post('/trocarStatus', (req, res) => {
 
         connection.query(
           updateCheckoutProdutosQuery,
-          [novoStatus, idCheckOut, idProduto],
+          [novoStatus, idCheckOut, idProduto, idCheckOutProduto],
           (error, results) => {
             if (error) {
               connection.rollback(() => {
@@ -1054,6 +1072,60 @@ app.get('/getCheckoutProdutosId/:id/:status', (req, res) => {
   connection.query(selectQuery, [idCliente], (error, results) => {
     if (error) {
       res.status(500).send('Error fetching products');
+      throw error;
+    }
+    res.status(200).json(results);
+  });
+});
+
+// Rota da tabela checkout por cliente
+app.get('/getPedidos/:id/:status', (req, res) => {
+  const idCliente = req.params.id;
+  const statusPedidos = req.params.status;
+  console.log('idCliente ' + idCliente);
+  console.log('statusPedidos ' + statusPedidos);
+
+  let selectQuery = '';
+
+  if (statusPedidos == 'TODOS') {
+    selectQuery = `SELECT *
+    FROM checkout
+  WHERE checkout.idCliente = ?`;
+  } else {
+    selectQuery = `SELECT *
+    FROM checkout
+  WHERE checkout.idCliente = ? AND checkout.status = '${statusPedidos}'`;
+  }
+  // Query to fetch all products
+
+  // Run the query
+  connection.query(selectQuery, [idCliente], (error, results) => {
+    if (error) {
+      res.status(500).send('Error fetching products');
+      throw error;
+    }
+    res.status(200).json(results);
+  });
+});
+
+// Rota da tabela checkout por id
+app.get('/getPedidosDetalhe/:id', (req, res) => {
+  const idCheckout = req.params.id;
+  console.log('idCheckout ' + idCheckout);
+  // Query to fetch products for a specific idCheckout
+
+  const selectQuery = `SELECT checkoutProdutos.id, checkoutProdutos.idProduto, checkoutProdutos.idCheckOut, checkoutProdutos.valorProduto, checkoutProdutos.status,
+    produtos.qtd, produtos.titulo, produtos.descrProduto, produtos.dtCompra, produtos.genero, produtos.valor 
+    FROM checkoutProdutos 
+    JOIN produtos ON produtos.id = checkoutProdutos.idProduto
+    WHERE checkoutProdutos.idCheckOut = ?`;
+
+  // Run the query with the specified idCheckout
+  connection.query(selectQuery, [idCheckout], (error, results) => {
+    if (error) {
+      res
+        .status(500)
+        .send('Error fetching products for the specified idCheckout');
       throw error;
     }
     res.status(200).json(results);

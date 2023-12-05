@@ -143,7 +143,7 @@ async function updateUser(data) {
             <div class="col-md-6">
               <label for="senha">Senha: </label>
               <input
-                type="password"
+                type="text"
                 id="senha"
                 class="form-control"
                 v-model="clienteData.clientes.senha"

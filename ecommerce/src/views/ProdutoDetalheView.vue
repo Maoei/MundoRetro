@@ -85,6 +85,12 @@ async function addCarrinho(id) {
               <div class="row justify-content-md-center">
                 <div class="col">
                   <form>
+                    <a
+                      href="#"
+                      class="btn btn-secondary mt-2 mb-2"
+                      style="margin-right: 2px"
+                      >R$ {{ produtoData.produtos.valor }}</a
+                    >
                     <div class="mb-3 offset-md-4 col-md-4">
                       Qtd
                       <input

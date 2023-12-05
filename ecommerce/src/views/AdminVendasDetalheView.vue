@@ -43,6 +43,7 @@ function trocarStatus(produto) {
 
   const requestBody = {
     idCheckOut: id,
+    idCheckOutProduto: produto.id,
     idCliente: localStorage.id,
     idProduto: produto.idProduto,
     status: status,
@@ -52,6 +53,7 @@ function trocarStatus(produto) {
   };
   console.log('status ' + requestBody.status);
   console.log('idCheckOut ' + requestBody.idCheckOut);
+  console.log('idCheckOutProduto ' + requestBody.idCheckOutProduto);
   console.log('observacao ' + requestBody.observacao);
   console.log('idProduto ' + requestBody.idProduto);
   console.log('valorCupom ' + requestBody.valorCupom);
@@ -68,7 +70,7 @@ function trocarStatus(produto) {
     .then((response) => response.json())
     .then((data) => {
       console.log('Resposta do backend:', data);
-      router.push('/admin');
+      router.push('/admin/pedidos');
     })
     .catch((error) => {
       console.error('Erro ao enviar dados:', error);
@@ -104,7 +106,10 @@ function trocarStatus(produto) {
               </h5>
               <p class="card-text">{{ produto.descrProduto }}</p>
               <p class="card-text">
-                <strong>ID Checkout:</strong> {{ produto.idCheckOut }}
+                <strong>ID Pedido:</strong> {{ produto.idCheckOut }}
+              </p>
+              <p class="card-text">
+                <strong>ID CheckoutProduto:</strong> {{ produto.id }}
               </p>
               <p class="card-text">
                 <strong>ID Produto:</strong> {{ produto.idProduto }}
@@ -142,7 +147,7 @@ function trocarStatus(produto) {
                   <div class="row mt-2">
                     <div class="col">
                       <button class="btn btn-secondary" type="submit">
-                        <RouterLink :to="'/admin'">Cancelar</RouterLink>
+                        <RouterLink :to="'/admin/pedidos'">Cancelar</RouterLink>
                       </button>
                       <button
                         class="btn btn-secondary"

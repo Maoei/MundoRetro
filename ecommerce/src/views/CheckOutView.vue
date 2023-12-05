@@ -126,11 +126,11 @@ async function getCarrinho() {
       carrinhoData.produtos = data;
       carrinhoData.produtos.forEach((item) => {
         carrinhoData.valorTotal += Number(item.valor) * Number(item.qtd);
-        //console.log(value);
+
         console.log(item.valor);
         console.log(item.qtd);
       });
-      carrinhoData.valorTotal = Math.ceil(carrinhoData.valorTotal);
+      carrinhoData.valorTotal = carrinhoData.valorTotal;
       checkoutData.valorPago = carrinhoData.valorTotal;
 
       exibir = true;
@@ -226,12 +226,25 @@ function validarCupom() {
       console.error('Erro ao enviar dados:', error);
     });
 }
+
 function calcularFrete() {
   console.log('Funciona');
   checkoutData.valorFrete = Math.floor(Math.random() * 50);
 }
+
 function converterParaMaiusculas() {
   checkoutData.cupom = checkoutData.cupom.toUpperCase();
+}
+
+function alertaValorMin() {
+  console.log('alertaValorMin');
+  console.log('checkoutData.cartoes[0].valor ' + checkoutData.cartoes[0].valor);
+  
+  if (checkoutData.cartoes[0].valor <= '10') {
+    alert('Valor mínimo para cada cartão deve ser R$10,00!');
+    return 0;
+  }
+
 }
 </script>
 
@@ -246,14 +259,14 @@ function converterParaMaiusculas() {
           <div class="col">
             <h3>Valor dos Produtos</h3>
             <a href="#" class="btn btn-secondary" style="margin-right: 2px"
-              >R$ {{ checkoutData.valorPago }}</a
+              >R$ {{ checkoutData.valorPago.toFixed(2) }}</a
             >
           </div>
 
           <div class="col">
             <h3>Valor do Frete</h3>
             <a href="#" class="btn btn-secondary" style="margin-right: 2px"
-              >R$ {{ checkoutData.valorFrete }}</a
+              >R$ {{ checkoutData.valorFrete.toFixed(2) }}</a
             >
           </div>
           <div class="col">
@@ -261,13 +274,13 @@ function converterParaMaiusculas() {
             <a href="#" class="btn btn-secondary" style="margin-right: 2px"
               >R$
               {{
-                Math.ceil(checkoutData.valorPago + checkoutData.valorFrete)
+                (checkoutData.valorPago + checkoutData.valorFrete).toFixed(2)
               }}</a
             >
           </div>
         </div>
       </div>
-      <div class="row mt-2">
+      <div class="row mt-2 ">
         <div class="col">
           <form>
             <div class="card-body">
@@ -276,7 +289,7 @@ function converterParaMaiusculas() {
                 v-for="produto in carrinhoData.produtos"
                 :key="produto.id"
               >
-                <div class="card mb-3 mt-3" style="max-width: 1200px">
+                <div class="card mb-3 mt-3 " style="max-width: 800px">
                   <div class="row g-0">
                     <div class="col-md-4">
                       <img
@@ -398,7 +411,9 @@ function converterParaMaiusculas() {
             <div class="col-md-1">
               <input
                 class="form-control"
+                step="0.01"
                 type="number"
+                v-on:change="alertaValorMin(checkoutData.cartoes[0].valor)"
                 v-model="checkoutData.cartoes[0].valor"
                 min="10"
                 :max="carrinhoData.valorTotal + checkoutData.valorFrete"
@@ -412,7 +427,7 @@ function converterParaMaiusculas() {
             <button class="btn btn-secondary" v-on:click="addCartao()">
               Adicionar Cartão
             </button>
-            <button class="btn btn-secondary" v-on:click="removeCartao()">
+            <button class="btn btn-secondary  ms-2" v-on:click="removeCartao()">
               Remover Cartão
             </button>
           </div>
@@ -431,24 +446,38 @@ function converterParaMaiusculas() {
         <div class="row mt-2" v-for="(val, index) in checkoutData.qtdCartoes">
           <div class="col">
             <h2>Escolha o Cartão</h2>
-            <select
-              :name="'cartao_' + val"
-              :id="'cartao_' + val"
-              v-model="checkoutData.cartoes[val].id"
-              :max="carrinhoData.valorTotal + checkoutData.valorFrete"
-              :min="0"
-            >
-              <option v-for="cartao in cartoesData.cartoes" :value="cartao">
-                {{ cartao.numeroCartao }}
-              </option>
-            </select>
-            <h2>Valor a Pagar no Cartão</h2>
-            <input
-              type="number"
-              v-model="checkoutData.cartoes[val].valor"
-              min="10"
-              :max="carrinhoData.valorTotal - checkoutData.cartoes[0].valor"
-            />
+            <div class="row">
+              <div class="col-md-3">
+                <select
+                class="form-select"
+                  :name="'cartao_' + val"
+                  :id="'cartao_' + val"
+                  v-model="checkoutData.cartoes[val].id"
+                  :max="carrinhoData.valorTotal + checkoutData.valorFrete"
+                  :min="0"
+                >
+                  <option v-for="cartao in cartoesData.cartoes" :value="cartao">
+                    {{ cartao.numeroCartao }}
+                  </option>
+                </select>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col">
+                <h2>Valor a Pagar no Cartão</h2>
+                <div class="col-md-1">
+                  <input
+                  class="form-control"
+                type="number"
+                step="0.01"
+                v-model="checkoutData.cartoes[val].valor"
+                min="10"
+                :max="carrinhoData.valorTotal - checkoutData.cartoes[0].valor"
+              />
+                </div>
+              </div>
+            </div>
+  
           </div>
         </div>
       </div>
@@ -462,7 +491,7 @@ function converterParaMaiusculas() {
           @input="converterParaMaiusculas"
           placeholder="Insira o código do cupom"
         />
-        <button class="btn btn-secondary" v-on:click="validarCupom()">
+        <button class="btn btn-secondary ms-2" v-on:click="validarCupom()">
           Validar Cupom
         </button>
       </div>

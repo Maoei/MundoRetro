@@ -91,6 +91,7 @@ CREATE TABLE checkoutPagamentos (
 	idCartao INT,
     numeroCartao VARCHAR(20),
     valorCartao DECIMAL(10, 2) NOT NULL,
+    ALTER TABLE checkoutPagamentos ADD COLUMN dtCompra DATE DEFAULT '2023-12-01',
 	FOREIGN KEY (idEndereco) REFERENCES enderecos(id) ON DELETE SET NULL,
 	FOREIGN KEY (idCartao) REFERENCES cartoes(id) ON DELETE SET NULL,
 	FOREIGN KEY (idProduto) REFERENCES produtos(id),
@@ -189,3 +190,6 @@ VALUES ('8888999911112222', 'Gustavo Fernandes', '04/23', 741, 4);
 
 INSERT INTO cartoes (numeroCartao, nomeCartao, validade, codigoSeguranca, idCliente) 
 VALUES ('6666555544443333', 'Larissa Gomes', '10/26', 258, 5);
+
+INSERT INTO cupons (codigoCupon, tipoCupom, descrCupom, dtValidade, valor, idCliente) VALUES
+('10OFF', 'Desconto', '10 reais de desconto', '2023-11-20', 10.00, 4 ) 

@@ -70,7 +70,7 @@ async function getCheckoutProdutos() {
       </div>
       <div class="row">
         <div
-          class="col"
+          class="col mt-2"
           v-for="produto in checkoutProdutosData.produtos"
           :key="produto.idCheckOut"
         >
@@ -88,7 +88,7 @@ async function getCheckoutProdutos() {
               </h5>
               <p class="card-text">{{ produto.descrProduto }}</p>
               <p class="card-text">
-                <strong>ID Checkout:</strong> {{ produto.idCheckOut }}
+                <strong>ID Pedido:</strong> {{ produto.idCheckOut }}
               </p>
               <p class="card-text">
                 <strong>ID Produto:</strong> {{ produto.idProduto }}

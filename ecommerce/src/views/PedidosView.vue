@@ -19,7 +19,7 @@ onMounted(async () => {
 
 async function getCheckoutProdutosId() {
   let status = checkoutProdutosData.statusPedidos;
-  fetch('http://localhost:3001/getCheckoutProdutosId/' + id + '/' + status, {
+  fetch('http://localhost:3001/getPedidos/' + id + '/' + status, {
     method: 'GET',
   })
     .then((response) => response.json())
@@ -69,7 +69,7 @@ function trocaSolicitada(produto) {
     <div class="container">
       <div class="row">
         <div class="col">
-          <h2 class="text-center">Lista de Compras</h2>
+          <h2 class="text-center">Lista de Pedidos</h2>
         </div>
       </div>
       <div class="row">
@@ -97,50 +97,37 @@ function trocaSolicitada(produto) {
           </form>
         </div>
       </div>
-      <div class="row mt-2">
-        <div
-          class="col mt-2"
-          v-for="produto in checkoutProdutosData.produtos"
-          :key="produto.idCheckOut"
-        >
-          <div class="card" style="width: 18rem">
-            <img
-              :src="'../../src/assets/images/' + produto.idProduto + '.png'"
-              class="card-img-top"
-              alt="..."
-            />
-            <div class="card-body">
-              <h5 class="card-title">
-                {{ produto.titulo }}
-              </h5>
-              <p class="card-text">{{ produto.descrProduto }}</p>
-              <p class="card-text">
-                <strong>ID Checkout:</strong> {{ produto.idCheckOut }}
-              </p>
-              <p class="card-text">
-                <strong>ID Produto:</strong> {{ produto.idProduto }}
-              </p>
-              <p class="card-text">
-                <strong>Valor:</strong> {{ produto.valorProduto }}
-              </p>
-              <p class="card-text">
-                <strong>Gênero:</strong> {{ produto.genero }}
-              </p>
+
+      <div class="row">
+        <div class="col mt-2">
+          <div
+            class="card mt-2"
+            v-for="produto in checkoutProdutosData.produtos"
+          >
+            <div
+              class="card-body d-flex align-items-center"
+              style="white-space: pre-line"
+            >
+              {{
+                'ID Pedido: ' +
+                produto.id +
+                '\n' +
+                `Valor: ` +
+                produto.valorFinal
+              }}
               <div class="col">
                 <a
                   href="#"
-                  class="btn btn-secondary"
+                  class="btn btn-secondary ms-5"
                   style="margin-right: 2px"
                   >{{ produto.status }}</a
                 >
               </div>
-              <div class="cols" v-if="produto.status == 'ENTREGUE'">
-                <a
-                  href="#"
-                  class="btn btn-secondary"
-                  style="margin-right: 2px"
-                  @click="trocaSolicitada(produto)"
-                  >Solicitar Troca</a
+              <div class="col">
+                <RouterLink
+                  class="btn btn-secondary float-end"
+                  :to="'/pedidos/detalhe/' + produto.id"
+                  >Detalhes do Pedido</RouterLink
                 >
               </div>
             </div>

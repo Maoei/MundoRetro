@@ -37,7 +37,8 @@ async function getProdutos() {
     <div class="container">
       <div class="row">
         <div class="col">
-          <h1 class="text-center">Produtos</h1>
+          <h1 class="text-center">Admin</h1>
+          <h2 class="text-center">Lista de Produtos</h2>
         </div>
       </div>
 

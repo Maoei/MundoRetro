@@ -37,14 +37,14 @@ async function getUsers() {
     <div class="container">
       <div class="row">
         <div class="col">
-          <h1>Admin</h1>
-          <h2>Lista de Usuários</h2>
+          <h1 class="text-center">Admin</h1>
+          <h2 class="text-center">Lista de Usuários</h2>
         </div>
       </div>
 
       <div class="row">
         <div class="col">
-          <div class="card" v-for="user in userData.users">
+          <div class="card mt-2" v-for="user in userData.users">
             <div class="card-body" style="white-space: pre-line">
               {{
                 'Usuário ID: ' +

@@ -75,7 +75,7 @@ async function updateEndereco(data) {
     <div class="container">
       <div class="row">
         <div class="col">
-          <h1>Cadastro de Endereços</h1>
+          <h1>ID Endereço: {{ enderecoData.enderecos.id }}</h1>
         </div>
       </div>
       <div class="row">

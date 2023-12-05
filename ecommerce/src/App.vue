@@ -77,7 +77,9 @@ setTimeout(async function () {
     data-bs-theme="dark"
   >
     <div class="container-fluid">
-      <a class="navbar-brand" href="#">Navbar</a>
+      <a class="navbar-brand" href="#"
+        ><RouterLink class="nav-link" to="/">Mundo Retro</RouterLink></a
+      >
       <button
         class="navbar-toggler"
         type="button"

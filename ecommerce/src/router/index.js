@@ -63,6 +63,12 @@ const router = createRouter({
       props: true,
     },
     {
+      path: '/cartoes/editar/:id',
+      name: 'cartoesEditar',
+      component: () => import('../views/CartoesEditarView.vue'),
+      props: true,
+    },
+    {
       path: '/cartoes/cadastro/:id',
       name: 'cartoesCadastro',
       component: () => import('../views/CartoesCadastroView.vue'),
@@ -126,6 +132,12 @@ const router = createRouter({
       path: '/pedidos',
       name: 'pedidos',
       component: () => import('../views/PedidosView.vue'),
+      props: true,
+    },
+    {
+      path: '/pedidos/detalhe/:id',
+      name: 'pedidosDetalhe',
+      component: () => import('../views/PedidosDetalheView.vue'),
       props: true,
     },
     {

@@ -24,6 +24,7 @@ async function getCartoes() {
     .then((data) => {
       console.log('Resposta do backend:', data);
       cartoesData.cartoes = data;
+      console.log('idCartao ', cartoesData.cartoes.id);
       exibir = true;
     })
     .catch((error) => {
@@ -44,18 +45,21 @@ async function getCartoes() {
       <div class="row">
         <div class="col">
           <div class="card" v-for="cartao in cartoesData.cartoes">
-            <div>
-              <img
-                :src="
-                  '../../src/assets/images/cartoes/' +
-                  cartao.numeroCartao.charAt(0) +
-                  '.jpg'
-                "
-                height="50"
-                width="50"
-              />
-            </div>
-            <div class="card-body" style="white-space: pre-line">
+            <div
+              class="card-body d-flex align-items-center"
+              style="white-space: pre-line"
+            >
+              <div class="float-start me-2">
+                <img
+                  :src="
+                    '../../src/assets/images/cartoes/' +
+                    cartao.numeroCartao.charAt(0) +
+                    '.png'
+                  "
+                  height="30"
+                  width="30"
+                />
+              </div>
               {{
                 'Nome do titular: ' +
                 cartao.nomeCartao +
@@ -63,10 +67,17 @@ async function getCartoes() {
                 `Número do Cartão: ` +
                 cartao.numeroCartao
               }}
+              <div class="col">
+                <RouterLink
+                  class="btn btn-secondary float-end"
+                  :to="'/cartoes/editar/' + cartao.id"
+                  >Editar Cartão</RouterLink
+                >
+              </div>
             </div>
           </div>
           <div class="row">
-            <div class="col">
+            <div class="col mt-3">
               <RouterLink
                 class="btn btn-secondary"
                 :to="'/cartoes/cadastro/' + id"

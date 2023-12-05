@@ -6,6 +6,7 @@ const carrinhoData = reactive({
   name: '',
   produtos: [],
   data: { qtd: 1 },
+  valorTotal: 0.0,
 });
 
 let id = '';
@@ -27,8 +28,11 @@ async function getCarrinho() {
     .then((data) => {
       console.log('Resposta do backend:', data);
       carrinhoData.produtos = data;
-      exibir = true;
-    })
+      carrinhoData.valorTotal = data.reduce((total, produto) => {
+      return total + (produto.valor * produto.qtd);
+      }, 0).toFixed(2);
+      console.log('carrinhoData.valorTotal ' + carrinhoData.valorTotal);
+   })
     .catch((error) => {
       console.error('Erro ao enviar dados:', error);
     });
@@ -89,9 +93,11 @@ function redirect() {
   <main>
     <div class="container text-center">
       <div class="row">
-        <h1>Carrinho</h1>
+        <div class="col">
+          <h1>Carrinho</h1>
+        </div>
       </div>
-      <div class="row justify-content-md-center">
+      <div class="row mt-2 ">
         <div class="col">
           <form>
             <div class="card-body">
@@ -100,34 +106,52 @@ function redirect() {
                 v-for="produto in carrinhoData.produtos"
                 :key="produto.id"
               >
-                <div class="card" style="width: 18rem">
-                  <img
-                    :src="'../src/assets/images/' + produto.produto_id + '.png'"
-                    class="card-img-top image-fluid"
-                    alt="..."
-                  />
-                  <div class="card-body">
-                    <h5 class="card-title">{{ produto.titulo }}</h5>
-                    <a
-                      href="#"
-                      class="btn btn-secondary"
-                      style="margin-right: 2px"
-                      >R$ {{ produto.valor }}</a
-                    >
-                    <input
-                      class="form-control mb-3 col-md-4 mt-3"
-                      type="number"
-                      min="1"
-                      :max="produto.produto_qtd"
-                      v-model="produto.qtd"
-                      v-on:change="addCarrinho(produto.produto_id, produto.qtd)"
-                    />
-                    <button
-                      class="btn btn-danger"
-                      v-on:click="deleteUmCarrinho(produto.id)"
-                    >
-                      Excluir
-                    </button>
+                <div class="card mb-3 mt-3 " style="max-width: 800px">
+                  <div class="row g-0">
+                    <div class="col-md-4">
+                      <img
+                        :src="
+                          '../src/assets/images/' + produto.produto_id + '.png'
+                        "
+                        class="img-fluid rounded-start"
+                        alt="..."
+                      />
+                    </div>
+                    <div class="col-md-8">
+                      <div class="card-body">
+                        <h5 class="card-title">{{ produto.titulo }}</h5>
+                        <p class="card-text">
+                          {{ produto.descrProduto }}
+                        </p>
+                        <a
+                    href="#"
+                    class="btn btn-secondary mt-2 mb-2"
+                    style="margin-right: 2px"
+                    >R$ {{ (produto.valor * produto.qtd).toFixed(2) }}</a
+                  >
+                        <p class="card-text ">
+                          <div class="mb-3 offset-md-4 col-md-4 justify-content-center">
+                            <input
+                              class="form-control "
+                              type="number"
+                              min="1"
+                              :max="produto.produto_qtd"
+                              v-model="produto.qtd"
+                              v-on:change="
+                                addCarrinho(produto.produto_id, produto.qtd)
+                              "
+                              
+                            />
+                            <button
+                    class="btn btn-danger mt-2"
+                    v-on:click="deleteUmCarrinho(produto.id)"
+                  >
+                    Excluir
+                  </button>
+                          </div>
+                        </p>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -136,7 +160,7 @@ function redirect() {
         </div>
       </div>
       <div class="row justify-content-md-center">
-        <div class="col">
+        <div class="col mt-4">
           <button class="btn btn-secondary" v-on:click="redirect()">
             Ir para o pagamento
           </button>
