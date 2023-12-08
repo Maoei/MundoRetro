@@ -126,6 +126,26 @@ app.put('/updateUser/:id', (req, res) => {
   );
 });
 
+//rota para excluir usuário
+app.delete('/deletarUser/:id', (req, res) => {
+  let userId = req.params.id;
+
+  const deleteQuery = `DELETE FROM clientes WHERE id = ?
+     `;
+
+  connection.connect();
+
+  connection.query(deleteQuery, [userId], (error, results) => {
+    if (error) {
+      connection.rollback(() => {
+        res.status(500).send('Error deleting user');
+        throw error;
+      });
+    }
+    res.status(200).send('User deleted successfully');
+  });
+});
+
 //rotas de produtos
 app.get('/getProdutos', (req, res) => {
   console.log(req.body);
@@ -455,7 +475,7 @@ app.post('/comprar', (req, res) => {
 // Rota para listar endereços por cliente
 app.get('/getEnderecos/:id', (req, res) => {
   const idCliente = req.params.id;
-  const query = 'SELECT * FROM enderecos WHERE idCliente = ?';
+  const query = `SELECT id, cep, endereco, COALESCE(numero,'Sem Número') AS numero, COALESCE(complemento,'Sem Complemento') AS complemento, bairro, cidade, estado, idCliente FROM enderecos WHERE idCliente = ?`;
 
   connection.query(query, idCliente, (error, results, fields) => {
     if (error) {
@@ -663,11 +683,9 @@ app.post('/checkout/finalizar', (req, res) => {
                               'Erro ao adicionar produto ao checkout:',
                               produtosError
                             );
-                            res
-                              .status(500)
-                              .json({
-                                error: 'Erro ao adicionar produto ao checkout',
-                              });
+                            res.status(500).json({
+                              error: 'Erro ao adicionar produto ao checkout',
+                            });
                           }
                         }
                       );

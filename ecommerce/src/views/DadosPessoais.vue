@@ -35,6 +35,24 @@ async function getUserId() {
       console.error('Erro ao enviar dados:', error);
     });
 }
+
+async function deleteUser(id) {
+  fetch(`http://localhost:3001/deletarUser/${id}`, {
+    method: 'DELETE',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ userId: localStorage.id }),
+  })
+    .then((response) => response)
+    .then((data) => {
+      console.log('Resposta do backend:', data);
+      getUserId(id);
+    })
+    .catch((error) => {
+      console.error('Erro ao enviar dados:', error);
+    });
+}
 </script>
 
 <template v-if="exibir">
@@ -143,6 +161,11 @@ async function getUserId() {
                 <RouterLink :to="'/dados-pessoais/editar'"
                   >Editar Dados</RouterLink
                 >
+              </button>
+            </div>
+            <div class="col-12">
+              <button class="btn btn-danger" v-on:click="deleteUser()">
+                Excluir Conta
               </button>
             </div>
           </div>
